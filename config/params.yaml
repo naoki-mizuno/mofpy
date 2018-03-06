@@ -1,0 +1,23 @@
+frame_id: world
+# Don't publish twist if no change is commanded
+quiet_on_zero: true
+mapping:
+  # Left Stick Up/Down
+  x: a1
+  # Left Stick Left/Right
+  y: a0
+  # Axis 4 (R2) for plus, axis 3 (L2) for minus
+  # Active-low with button counterparts
+  z: [a4al7, a3al6]
+  # Axis 2 (Right Stick Left/Right) inverse
+  roll: -a2
+  # Axis 5 (Right Stick Up/Down)
+  pitch: a5
+  # Button 4 (R1) for plus (CCW), Button 5 (L1) for minus (CW)
+  yaw: [b4, b5]
+# Only publish twist every X milliseconds even if income is at higher rate
+throttle_ms: 50
+# Note: Leave the scale AS IS! Scaling is done in jog_server.
+scale:
+  translation: 1
+  rotation: 1

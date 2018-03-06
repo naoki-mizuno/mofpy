@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="joy_dev" default="/dev/input/js0" />
+
+  <node pkg="mofpy" type="mofpy_node.py" name="mofpy" output="screen" >
+    <rosparam command="load" file="$(find mofpy)/config/params.yaml" />
+  </node>
+
+  <node pkg="joy" type="joy_node" name="joy" >
+    <param name="dev" value="$(arg joy_dev)" />
+    <param name="deadzone" value="0" />
+  </node>
+</launch>
