@@ -2,6 +2,7 @@
 
 import rospy
 from sensor_msgs.msg import Joy
+from std_msgs.msg import Float64
 from geometry_msgs.msg import TwistStamped
 
 from .joy_mapping import JoyMapping
@@ -12,7 +13,9 @@ class Controller:
         self.__frame_id = rospy.get_param('~frame_id', 'world')
         self.__scale_trn = rospy.get_param('~scale/translation', 0.1)
         self.__scale_rot = rospy.get_param('~scale/rotation', 0.01)
+        self.__scale_hand = rospy.get_param('~scale/hand', 0.1)
         self.__throttle_ms = rospy.get_param('~throttle_ms', 50)
+        self.__hand_topic = rospy.get_param('~hand_topic', 'hand')
         self.__quiet_on_zero = rospy.get_param('~quiet_on_zero', True)
         self.__mapping = Controller.__mapping__()
         self.__last_msg = Joy()
@@ -20,6 +23,9 @@ class Controller:
         self.cmd_delta_pub = rospy.Publisher('cmd_delta',
                                              TwistStamped,
                                              queue_size=1)
+        self.cmd_delta_hand_pub = rospy.Publisher(self.__hand_topic,
+                                                  Float64,
+                                                  queue_size=1)
         self.joy_sub = rospy.Subscriber('joy',
                                         Joy,
                                         self.cb_joy,
@@ -39,6 +45,13 @@ class Controller:
         d_roll = self.__scale_rot * self.__get_value__('roll', msg)
         d_pitch = self.__scale_rot * self.__get_value__('pitch', msg)
         d_yaw = self.__scale_rot * self.__get_value__('yaw', msg)
+
+        # Don't stop on release
+        d_hand = self.__scale_hand * self.__get_value__('hand', msg)
+        if d_hand != 0:
+            d_hand_msg = Float64()
+            d_hand_msg.data = d_hand
+            self.cmd_delta_hand_pub.publish(d_hand_msg)
 
         if self.__quiet_on_zero:
             is_quiet = all(map(lambda val: val == 0, [
@@ -74,7 +87,9 @@ class Controller:
             # Right Stick Up/Down
             'pitch': 'a5',
             # R1 for plus (CCW) and L1 for minus (CW)
-            'yaw': ('b4', 'b5')
+            'yaw': ('b4', 'b5'),
+            # Hand open/close
+            'hand': ('b1', 'b2')
         }
 
         mapping = {}
