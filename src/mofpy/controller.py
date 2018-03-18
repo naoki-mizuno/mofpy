@@ -19,6 +19,7 @@ class Controller:
         self.__quiet_on_zero = rospy.get_param('~quiet_on_zero', True)
         self.__mapping = Controller.__mapping__()
         self.__last_msg = Joy()
+        self.__published_zero = False
 
         self.cmd_delta_pub = rospy.Publisher('cmd_delta',
                                              TwistStamped,
@@ -39,12 +40,7 @@ class Controller:
             return
         self.__last_msg = msg
 
-        dx = self.__scale_trn * self.__get_value__('x', msg)
-        dy = self.__scale_trn * self.__get_value__('y', msg)
-        dz = self.__scale_trn * self.__get_value__('z', msg)
-        d_roll = self.__scale_rot * self.__get_value__('roll', msg)
-        d_pitch = self.__scale_rot * self.__get_value__('pitch', msg)
-        d_yaw = self.__scale_rot * self.__get_value__('yaw', msg)
+        twist, is_quiet = self.__get_twist__(msg)
 
         # Don't stop on release
         d_hand = self.__scale_hand * self.__get_value__('hand', msg)
@@ -54,23 +50,15 @@ class Controller:
             self.cmd_delta_hand_pub.publish(d_hand_msg)
 
         if self.__quiet_on_zero:
-            is_quiet = all(map(lambda val: val == 0, [
-                dx, dy, dz, d_roll, d_pitch, d_yaw
-            ]))
             if is_quiet:
+                # Publish the all-zero message just once
+                if not self.__published_zero:
+                    self.cmd_delta_pub.publish(twist)
+                    self.__published_zero = True
                 return
 
-        twist = TwistStamped()
-        twist.header = msg.header
-        twist.header.frame_id = self.__frame_id
-        twist.twist.linear.x = dx
-        twist.twist.linear.y = dy
-        twist.twist.linear.z = dz
-        twist.twist.angular.x = d_roll
-        twist.twist.angular.y = d_pitch
-        twist.twist.angular.z = d_yaw
-
         self.cmd_delta_pub.publish(twist)
+        self.__published_zero = False
 
     @staticmethod
     def __mapping__():
@@ -105,6 +93,29 @@ class Controller:
                 mapping[key] = JoyMapping(mapping_str[key])
 
         return mapping
+
+    def __get_twist__(self, joy_msg):
+        dx = self.__scale_trn * self.__get_value__('x', joy_msg)
+        dy = self.__scale_trn * self.__get_value__('y', joy_msg)
+        dz = self.__scale_trn * self.__get_value__('z', joy_msg)
+        d_roll = self.__scale_rot * self.__get_value__('roll', joy_msg)
+        d_pitch = self.__scale_rot * self.__get_value__('pitch', joy_msg)
+        d_yaw = self.__scale_rot * self.__get_value__('yaw', joy_msg)
+
+        twist = TwistStamped()
+        twist.header = joy_msg.header
+        twist.header.frame_id = self.__frame_id
+        twist.twist.linear.x = dx
+        twist.twist.linear.y = dy
+        twist.twist.linear.z = dz
+        twist.twist.angular.x = d_roll
+        twist.twist.angular.y = d_pitch
+        twist.twist.angular.z = d_yaw
+
+        is_quiet = all(map(lambda val: val == 0, [
+            dx, dy, dz, d_roll, d_pitch, d_yaw
+        ]))
+        return twist, is_quiet
 
     def __get_value__(self, key, msg):
         mapping = self.__mapping[key]
