@@ -1,4 +1,4 @@
-frame_id: world
+frame_id: hand
 # Don't publish twist if no change is commanded
 quiet_on_zero: true
 mapping:
