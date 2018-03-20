@@ -1,4 +1,4 @@
-frame_id: world
+frame_id: hand
 # Don't publish twist if no change is commanded
 quiet_on_zero: true
 mapping:
@@ -15,9 +15,15 @@ mapping:
   pitch: a5
   # Button 4 (R1) for plus (CCW), Button 5 (L1) for minus (CW)
   yaw: [b4, b5]
+  # Hand open () and close ()
+  hand: [b1, b2]
 # Only publish twist every X milliseconds even if income is at higher rate
 throttle_ms: 50
-# Note: Leave the scale AS IS! Scaling is done in jog_server.
+hand_topic: /quince_arm/hand_controller/command
+# Note: Leave the translation/rotation scale AS IS!
+# Scaling is done in jog_server.
 scale:
   translation: 1
   rotation: 1
+  # Empirically determined torque to apply
+  hand: 5
