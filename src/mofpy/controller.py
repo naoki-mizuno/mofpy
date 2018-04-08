@@ -14,10 +14,11 @@ class Controller:
         self.__scale_trn = rospy.get_param('~scale/translation', 0.1)
         self.__scale_rot = rospy.get_param('~scale/rotation', 0.01)
         self.__scale_hand = rospy.get_param('~scale/hand', 0.1)
-        self.__throttle_ms = rospy.get_param('~throttle_ms', 50)
         self.__hand_topic = rospy.get_param('~hand_topic', 'hand')
         self.__quiet_on_zero = rospy.get_param('~quiet_on_zero', True)
+        self.__rate = rospy.get_param('~rate', 20)
         self.__mapping = Controller.__mapping__()
+        self.__received_first_msg = False
         self.__last_msg = Joy()
         self.__published_zero = False
 
@@ -33,12 +34,13 @@ class Controller:
                                         queue_size=1)
 
     def cb_joy(self, msg):
-        curr_msg = msg.header.stamp.to_sec()
-        last_msg = self.__last_msg.header.stamp.to_sec()
-        since_last_msg = curr_msg - last_msg
-        if since_last_msg < self.__throttle_ms / 1000.0:
-            return
         self.__last_msg = msg
+        self.__received_first_msg = True
+        self.publish_cmd_delta(msg)
+
+    def publish_cmd_delta(self, msg):
+        if not self.__received_first_msg:
+            return
 
         twist, is_quiet = self.__get_twist__(msg)
 
@@ -59,6 +61,14 @@ class Controller:
 
         self.cmd_delta_pub.publish(twist)
         self.__published_zero = False
+
+    def spin(self):
+        rate = rospy.Rate(self.__rate)
+        while not rospy.is_shutdown():
+            msg = self.__last_msg
+            msg.header.stamp = rospy.Time.now()
+            self.publish_cmd_delta(msg)
+            rate.sleep()
 
     @staticmethod
     def __mapping__():
