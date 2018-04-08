@@ -22,7 +22,7 @@ hand_topic: /quince_arm/hand_controller/command
 # Note: Leave the translation/rotation scale AS IS!
 # Scaling is done in jog_server.
 scale:
-  translation: 1
-  rotation: 1
+  translation: 0.030
+  rotation: 0.06
   # Empirically determined torque to apply
   hand: 5
