@@ -36,7 +36,6 @@ class Controller:
     def cb_joy(self, msg):
         self.__last_msg = msg
         self.__received_first_msg = True
-        self.publish_cmd_delta(msg)
 
     def publish_cmd_delta(self, msg):
         if not self.__received_first_msg:
