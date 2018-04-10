@@ -17,12 +17,12 @@ mapping:
   yaw: [b4, b5]
   # Hand open () and close ()
   hand: [b0, b1]
-rate: 200
+rate: 20
 hand_topic: /quince_arm/hand_controller/command
 # Note: Leave the translation/rotation scale AS IS!
 # Scaling is done in jog_server.
 scale:
-  translation: 0.030
-  rotation: 0.06
+  translation: 0.1
+  rotation: 0.4
   # Empirically determined torque to apply
   hand: 5
