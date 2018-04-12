@@ -1,0 +1,10 @@
+frame_id: hand
+# Don't publish twist if no change is commanded
+quiet_on_zero: true
+rate: 50
+hand_topic: /quince_arm/hand_controller/command
+scale:
+  translation: 0.05
+  rotation: 0.3
+  # Empirically determined torque to apply
+  hand: 5

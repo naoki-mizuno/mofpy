@@ -1,6 +1,3 @@
-frame_id: hand
-# Don't publish twist if no change is commanded
-quiet_on_zero: true
 mapping:
   # Left Stick Up/Down
   x: a1
@@ -17,12 +14,3 @@ mapping:
   yaw: [b4, b5]
   # Hand open () and close ()
   hand: [b1, b2]
-rate: 20
-hand_topic: /quince_arm/hand_controller/command
-# Note: Leave the translation/rotation scale AS IS!
-# Scaling is done in jog_server.
-scale:
-  translation: 0.1
-  rotation: 0.4
-  # Empirically determined torque to apply
-  hand: 5

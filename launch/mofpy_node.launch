@@ -2,10 +2,11 @@
 <launch>
   <arg name="joy_dev" default="/dev/input/js0" />
   <!-- Choose from: ps4_wired, ps4_wireless -->
-  <arg name="config_type" default="ps4_wired" />
+  <arg name="joypad_type" default="ps4_wired" />
 
   <node pkg="mofpy" type="mofpy_node.py" name="mofpy" output="screen" >
-    <rosparam command="load" file="$(find mofpy)/config/$(arg config_type).yaml" />
+    <rosparam command="load" file="$(find mofpy)/config/common.yaml" />
+    <rosparam command="load" file="$(find mofpy)/config/$(arg joypad_type).yaml" />
   </node>
 
   <node pkg="joy" type="joy_node" name="joy" >
