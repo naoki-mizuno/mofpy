@@ -14,3 +14,17 @@ mapping:
   yaw: [b4, b5]
   # Hand open (circle) and close (x)
   hand: [b0, b1]
+
+presets:
+  move_group_name: arm
+  mappings:
+    # Center touch pad
+    initial: 10
+    # Square
+    ready_low: 3
+    # Triangle
+    ready_high: 2
+    # Option for custom pose
+    custom_1: 9
+    # Share button
+    recovery: 8

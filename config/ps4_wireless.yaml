@@ -14,3 +14,32 @@ mapping:
   yaw: [b4, b5]
   # Hand open (circle) and close (x)
   hand: [b1, b2]
+  # TODO: Support the following format
+  # z:
+  #   plus:
+  #     type: axis
+  #     idx: 4
+  #     active_low: 7
+  #     # active_low: true
+  #     # inverted: true
+  #   minus:
+  #     type: axis
+  #     idx: 3
+  #     active_low: true
+
+presets:
+  move_group_name: arm
+  # Triple-press to trigger
+  mappings:
+    # Center touch pad
+    initial: 13
+    # Square
+    ready_low: 0
+    # Triangle
+    ready_high: 3
+    # Option for custom pose
+    custom_1: 9
+    # PS button for custom pose 2
+    custom_2: 12
+    # Share button
+    recovery: 8

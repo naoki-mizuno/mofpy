@@ -4,6 +4,7 @@ from std_msgs.msg import Float64
 from geometry_msgs.msg import TwistStamped
 
 from .joy_mapping import JoyMapping
+from .preset_handler import PresetHandler
 
 
 class Controller:
@@ -19,6 +20,15 @@ class Controller:
         self.__received_first_msg = False
         self.__last_msg = Joy()
         self.__published_zero = False
+        # Only handle preset poses if registered
+        self.__preset_handler = None
+
+        # Presets
+        if rospy.has_param('~presets'):
+            move_group_name = rospy.get_param('~presets/move_group_name')
+            mappings = rospy.get_param('~presets/mappings')
+            self.__preset_handler = PresetHandler(move_group_name)
+            self.__preset_handler.register_dict_callbacks(mappings)
 
         self.cmd_delta_pub = rospy.Publisher('cmd_delta',
                                              TwistStamped,
@@ -34,6 +44,8 @@ class Controller:
     def cb_joy(self, msg):
         self.__last_msg = msg
         self.__received_first_msg = True
+        if self.__preset_handler is not None:
+            self.__preset_handler.handle(msg)
 
     def publish_cmd_delta(self, msg):
         if not self.__received_first_msg:

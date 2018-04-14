@@ -8,3 +8,15 @@ scale:
   rotation: 0.3
   # Empirically determined torque to apply
   hand: 5
+
+recovery:
+  - type: single_point_trajectory
+    topic: quince_arm/controller/command
+    joints:
+      joint4: 0
+      joint5: 0
+      joint6: -1.5707
+    frame_id: world
+    execution_time: 2.5
+  - type: sleep
+    duration: 3.0

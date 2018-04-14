@@ -9,6 +9,6 @@
 !LICENSE.txt
 !nodes/
 !src/
-!src/*
+!src/**/
 !config/
 !launch/
