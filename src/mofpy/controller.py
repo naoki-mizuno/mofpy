@@ -69,35 +69,17 @@ class Controller:
 
     @staticmethod
     def __mapping__():
-        # Default mapping
-        mapping_str = {
-            # Left Stick Up/Down
-            'x': 'a1',
-            # Left Stick Left/Right
-            'y': 'a0',
-            # R2 for plus and L2 for minus (active-low w/ button counterparts)
-            'z': ('a4al7', 'a3al6'),
-            # Right Stick Left/Right
-            'roll': '-a2',
-            # Right Stick Up/Down
-            'pitch': 'a5',
-            # R1 for plus (CCW) and L1 for minus (CW)
-            'yaw': ('b4', 'b5'),
-            # Hand open/close
-            'hand': ('b1', 'b2')
-        }
-
+        params = rospy.get_param('~mapping', dict())
         mapping = {}
-        for key in mapping_str.keys():
+        for key in params.keys():
             param_name = '~mapping/' + key
-            mapping_str[key] = rospy.get_param(param_name, mapping_str[key])
+            params[key] = rospy.get_param(param_name)
             # Convert to JoyMapping objects
-            if type(mapping_str[key]) is tuple or \
-                    type(mapping_str[key]) is list:
-                mapping[key] = [JoyMapping(mapping_str[key][0]),
-                                JoyMapping(mapping_str[key][1])]
+            if type(params[key]) is tuple or type(params[key]) is list:
+                mapping[key] = [JoyMapping(params[key][0]),
+                                JoyMapping(params[key][1])]
             else:
-                mapping[key] = JoyMapping(mapping_str[key])
+                mapping[key] = JoyMapping(params[key])
 
         return mapping
 
@@ -125,6 +107,9 @@ class Controller:
         return twist, is_quiet
 
     def __get_value__(self, key, msg):
+        if key not in self.__mapping:
+            return 0
+
         mapping = self.__mapping[key]
 
         if type(mapping) is tuple or type(mapping) is list:
