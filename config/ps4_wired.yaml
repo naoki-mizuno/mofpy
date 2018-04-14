@@ -12,5 +12,5 @@ mapping:
   pitch: a4
   # Button 4 (R1) for plus (CCW), Button 5 (L1) for minus (CW)
   yaw: [b4, b5]
-  # Hand open () and close ()
+  # Hand open (circle) and close (x)
   hand: [b0, b1]
