@@ -15,16 +15,29 @@ mapping:
   # Hand open (circle) and close (x)
   hand: [b0, b1]
 
-presets:
-  move_group_name: arm
-  mappings:
+  presets:
     # Center touch pad
-    initial: 10
+    initial:
+      event: triple_press
+      index: 10
     # Square
-    ready_low: 3
+    ready_low:
+      event: triple_press
+      index: 3
     # Triangle
-    ready_high: 2
+    ready_high:
+      event: triple_press
+      index: 2
     # Option for custom pose
-    custom_1: 9
+    custom_1:
+      event: triple_press
+      index: 9
+    remember_custom_1:
+      event: long_press
+      duration: 3
+      index: 9
     # Share button
-    recovery: 8
+    recovery:
+      event: long_press
+      duration: 3
+      index: 8

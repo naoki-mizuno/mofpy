@@ -1,10 +1,10 @@
 import rospy
 
 
-from .recovery_action import RecoveryAction
+from .preset_task import PresetTask
 
 
-class Sleep(RecoveryAction):
+class Sleep(PresetTask):
     """
     :type __duration: float
     """

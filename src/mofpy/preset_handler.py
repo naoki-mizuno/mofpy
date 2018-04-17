@@ -2,10 +2,9 @@ import rospy
 from moveit_commander import roscpp_initializer
 from moveit_commander.robot import RobotCommander
 from moveit_commander.move_group import MoveGroupCommander
-from moveit_commander.exception import MoveItCommanderException
 
 from .joy_event_callback import JoyEventCallback
-from .recovery_action import *
+from .preset_action import *
 
 import sys
 
@@ -13,31 +12,22 @@ import sys
 class PresetHandler:
     """
     :type __callbacks: list[JoyEventCallback]
-    :type __recovery_actions: list[RecoveryAction]
+    :type __presets: dict[str, list[PresetTask]]
     """
-    def __init__(self, move_group_name):
+    def __init__(self):
         self.__callbacks = []
 
         roscpp_initializer.roscpp_initialize(sys.argv)
-        self.__robot = RobotCommander()
-        # Sometimes, MoveGroupCommander fails to initialize when Rviz
-        # startup is too slow. Try several times and then give up.
-        attempt = 0
-        initialized_commander = False
-        while not initialized_commander:
-            if attempt > 3:
-                rospy.logwarn('Could not connect to MoveGroupCommander. '
-                              'Disabling presets')
-                return
-            try:
-                self.__group = MoveGroupCommander(move_group_name)
-                initialized_commander = True
-            except RuntimeError as e:
-                rospy.logwarn(e)
-                rospy.logwarn('Trying again to initialize MoveGroupCommander')
-                attempt += 1
+        move_group_name = rospy.get_param('~presets/move_group_name')
+        self.__robot, self.__group = PresetHandler.__connect_to_move_group__(
+            move_group_name
+        )
 
-        self.__recovery_actions = PresetHandler.read_recovery_params(
+        # MoveGroupCommander has failed to initialize
+        if self.__group is None:
+            return
+
+        self.__presets = PresetHandler.read_presets(
             self.__robot, self.__group
         )
 
@@ -63,89 +53,86 @@ class PresetHandler:
             if callback.check(msg):
                 callback.call()
 
-    def move_to(self, preset_name):
-        rospy.loginfo('Moving to {0}'.format(preset_name))
-        self.__group.set_start_state_to_current_state()
-        try:
-            self.__group.set_named_target(preset_name)
-        except MoveItCommanderException as e:
-            rospy.logerr(e)
+    def execute(self, preset_name):
+        if preset_name not in self.__presets:
+            rospy.logerr('{0} not found in presets'.format(preset_name))
             return
 
-        self.__group.go(wait=True)
+        for preset in self.__presets[preset_name]:
+            preset.execute()
 
-    def remember_current_pose(self, preset_name):
-        rospy.loginfo('Remembered current pose as {0}'.format(preset_name))
-        self.__group.remember_joint_values(preset_name)
+    def register_mappings(self, mappings):
+        """
+        :type mappings: dict[str, dict[str, int | str]]
+        """
+        for preset_name in mappings.keys():
+            button = mappings[preset_name]['index']
+            event = mappings[preset_name]['event']
+            if event == JoyEventCallback.LONG_PRESS:
+                duration = mappings[preset_name]['duration']
+            else:
+                duration = None
 
-    def execute_recovery(self):
-        rospy.loginfo('Executing recovery behavior')
-        for action in self.__recovery_actions:
-            action.execute()
+            cb = JoyEventCallback(button=button,
+                                  event=event,
+                                  callback=self.execute,
+                                  callback_args=(preset_name,),
+                                  press_duration=duration)
+            self.register_callback(cb)
 
     @staticmethod
-    def read_recovery_params(robot, group):
-        if not rospy.has_param('~recovery'):
-            return []
+    def __connect_to_move_group__(move_group_name):
+        robot = RobotCommander()
 
-        actions = []
-        definitions = rospy.get_param('~recovery')
-        for definition in definitions:
+        # Sometimes, MoveGroupCommander fails to initialize when Rviz
+        # startup is too slow. Try several times and then give up.
+        attempt = 0
+        while attempt <= 3:
+            try:
+                group = MoveGroupCommander(move_group_name)
+                return robot, group
+            except RuntimeError as e:
+                rospy.logwarn(e)
+                rospy.logwarn('Trying again to initialize MoveGroupCommander')
+                attempt += 1
+
+        msg = 'Could not connect to MoveGroupCommander. Disabling presets'
+        rospy.logwarn(msg)
+        return robot, None
+
+    @staticmethod
+    def read_presets(robot, group):
+        preset_definitions = rospy.get_param('~presets', dict())
+        preset_actions = dict()
+        for preset_name in preset_definitions.keys():
+            if preset_name == 'move_group_name':
+                continue
+
+            preset = PresetHandler.__read_preset__(preset_name,
+                                                   robot,
+                                                   group)
+            preset_actions[preset_name] = preset
+        return preset_actions
+
+    @staticmethod
+    def __read_preset__(preset_name, robot, group):
+        tasks = []
+        preset = rospy.get_param('~presets/{0}'.format(preset_name))
+        for task in preset:
             # TODO: trajectory, command
-            if 'type' not in definition:
+            if 'type' not in task:
                 rospy.logerr('Required key "type" not set')
                 continue
-            action_type = definition['type']
-            if action_type == 'single_point_trajectory':
-                actions.append(SinglePointTrajectory(definition, group))
-            elif action_type == 'sleep':
-                actions.append(Sleep(definition))
-            elif action_type == 'move_group_state':
-                actions.append(MoveGroupState(definition, robot, group))
+            task_type = task['type']
+            if task_type == 'single_point_trajectory':
+                tasks.append(SinglePointTrajectory(task, group))
+            elif task_type == 'sleep':
+                tasks.append(Sleep(task))
+            elif task_type == 'move_group_state':
+                tasks.append(MoveGroupState(task, robot, group))
+            elif task_type == 'remember_move_group_state':
+                tasks.append(RememberMoveGroupState(task, robot, group))
             else:
-                msg = 'Action type {0} not implemented'.format(action_type)
+                msg = 'Task type {0} not implemented'.format(task_type)
                 rospy.logerr(msg)
-        return actions
-
-    def register_dict_callbacks(self, mapping):
-        """
-        Converts and registers a dictionary describing callbacks
-
-        The dictionary is typically obtained from the ROS param server,
-        and has the name as the state name and the buttons as values.
-
-        Registered keywords:
-          recover: execute recovery behavior
-          custom*: remember current joint positions by the given name when
-                   long-pressing for 3 seconds and recall by triple-pressing
-        :param mapping:
-        :type mapping: dict[str, int]
-        """
-        for preset_name in mapping.keys():
-            button = mapping[preset_name]
-            if preset_name == 'recovery':
-                cb = JoyEventCallback(button,
-                                      JoyEventCallback.LONG_PRESS,
-                                      self.execute_recovery,
-                                      press_duration=3)
-                self.register_callback(cb)
-            elif preset_name.startswith('custom'):
-                # Remember
-                cb = JoyEventCallback(button,
-                                      JoyEventCallback.LONG_PRESS,
-                                      self.remember_current_pose,
-                                      (preset_name,),
-                                      press_duration=3)
-                self.register_callback(cb)
-                # Recall
-                cb = JoyEventCallback(button,
-                                      JoyEventCallback.TRIPLE_PRESS,
-                                      self.move_to,
-                                      (preset_name,))
-                self.register_callback(cb)
-            else:
-                cb = JoyEventCallback(button,
-                                      JoyEventCallback.TRIPLE_PRESS,
-                                      self.move_to,
-                                      (preset_name,))
-                self.register_callback(cb)
+        return tasks

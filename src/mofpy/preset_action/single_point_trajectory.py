@@ -2,10 +2,10 @@ import rospy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from moveit_commander.move_group import MoveGroupCommander
 
-from .recovery_action import RecoveryAction
+from .preset_task import PresetTask
 
 
-class SinglePointTrajectory(RecoveryAction):
+class SinglePointTrajectory(PresetTask):
     """
     Publishes a JointTrajectory message to the specified topic
 
@@ -25,7 +25,7 @@ class SinglePointTrajectory(RecoveryAction):
         self.__time_from_start = self.get_required_key('execution_time')
         self.__frame_id, found = self.get_key('frame_id', 'world')
         if not found:
-            rospy.logwarn('frame_id not found for single_point_trajectory.' \
+            rospy.logwarn('frame_id not found for single_point_trajectory.'
                           ' Using {0}'.format(self.__frame_id))
         self.__joints = self.get_required_key('joints')
         self.__group = group

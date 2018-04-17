@@ -11,15 +11,38 @@ scale:
   # Empirically determined torque to apply
   hand: 5
 
-recovery:
-  - type: single_point_trajectory
-    topic: quince_arm/controller/command
-    joints:
-      joint3: -0.3
-      joint4: 0
-      joint5: 0
-      joint6: -1.5707
-    frame_id: world
-    execution_time: 2.5
-  - type: sleep
-    duration: 3.0
+presets:
+  move_group_name: arm
+  initial:
+    - type: move_group_state
+      state_name: initial
+  ready_low:
+    - type: move_group_state
+      state_name: ready_low
+  ready_high:
+    - type: move_group_state
+      state_name: ready_high
+  custom_1:
+    - type: move_group_state
+      state_name: custom_1
+  custom_2:
+    - type: move_group_state
+      state_name: custom_2
+  remember_custom_1:
+    - type: remember_move_group_state
+      state_name: custom_1
+  remember_custom_2:
+    - type: remember_move_group_state
+      state_name: custom_2
+  recovery:
+    - type: single_point_trajectory
+      topic: quince_arm/controller/command
+      joints:
+        joint3: -0.3
+        joint4: 0
+        joint5: 0
+        joint6: -1.5707
+      frame_id: world
+      execution_time: 2.5
+    - type: sleep
+      duration: 3.0
