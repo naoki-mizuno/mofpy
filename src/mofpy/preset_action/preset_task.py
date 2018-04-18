@@ -1,10 +1,10 @@
 from abc import *
 
 
-class RecoveryAction(object):
+class PresetTask(object):
     def __init__(self, definition):
         """
-        Define the recovery action
+        Define a task
 
         :param definition: a dictionary containing the description of action
         """

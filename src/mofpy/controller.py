@@ -24,11 +24,10 @@ class Controller:
         self.__preset_handler = None
 
         # Presets
-        if rospy.has_param('~presets'):
-            move_group_name = rospy.get_param('~presets/move_group_name')
-            mappings = rospy.get_param('~presets/mappings')
-            self.__preset_handler = PresetHandler(move_group_name)
-            self.__preset_handler.register_dict_callbacks(mappings)
+        if rospy.has_param('~mapping/presets'):
+            mappings = rospy.get_param('~mapping/presets')
+            self.__preset_handler = PresetHandler()
+            self.__preset_handler.register_mappings(mappings)
 
         self.cmd_delta_pub = rospy.Publisher('cmd_delta',
                                              TwistStamped,
@@ -84,8 +83,9 @@ class Controller:
         params = rospy.get_param('~mapping', dict())
         mapping = {}
         for key in params.keys():
-            param_name = '~mapping/' + key
-            params[key] = rospy.get_param(param_name)
+            if type(params[key]) is dict:
+                continue
+
             # Convert to JoyMapping objects
             if type(params[key]) is tuple or type(params[key]) is list:
                 mapping[key] = [JoyMapping(params[key][0]),

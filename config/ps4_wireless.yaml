@@ -27,19 +27,37 @@ mapping:
   #     idx: 3
   #     active_low: true
 
-presets:
-  move_group_name: arm
-  # Triple-press to trigger
-  mappings:
+  presets:
     # Center touch pad
-    initial: 13
+    initial:
+      event: triple_press
+      index: 13
     # Square
-    ready_low: 0
+    ready_low:
+      event: triple_press
+      index: 0
     # Triangle
-    ready_high: 3
+    ready_high:
+      event: triple_press
+      index: 3
     # Option for custom pose
-    custom_1: 9
+    custom_1:
+      event: triple_press
+      index: 9
+    remember_custom_1:
+      event: long_press
+      duration: 3
+      index: 9
     # PS button for custom pose 2
-    custom_2: 12
+    custom_2:
+      event: triple_press
+      index: 12
+    remember_custom_2:
+      event: long_press
+      duration: 3
+      index: 12
     # Share button
-    recovery: 8
+    recovery:
+      event: long_press
+      duration: 3
+      index: 8
