@@ -12,8 +12,6 @@ class Controller:
         self.__frame_id = rospy.get_param('~frame_id', 'world')
         self.__scale_trn = rospy.get_param('~scale/translation', 0.1)
         self.__scale_rot = rospy.get_param('~scale/rotation', 0.01)
-        self.__scale_hand = rospy.get_param('~scale/hand', 0.1)
-        self.__hand_topic = rospy.get_param('~hand_topic', 'hand')
         self.__quiet_on_zero = rospy.get_param('~quiet_on_zero', True)
         self.__rate = rospy.get_param('~rate', 20)
         self.__mapping = Controller.__mapping__()
@@ -32,9 +30,6 @@ class Controller:
         self.cmd_delta_pub = rospy.Publisher('cmd_delta',
                                              TwistStamped,
                                              queue_size=1)
-        self.cmd_delta_hand_pub = rospy.Publisher(self.__hand_topic,
-                                                  Float64,
-                                                  queue_size=1)
         self.joy_sub = rospy.Subscriber('joy',
                                         Joy,
                                         self.cb_joy,
@@ -51,13 +46,6 @@ class Controller:
             return
 
         twist, is_quiet = self.__get_twist__(msg)
-
-        # Don't stop on release
-        d_hand = self.__scale_hand * self.__get_value__('hand', msg)
-        if d_hand != 0:
-            d_hand_msg = Float64()
-            d_hand_msg.data = d_hand
-            self.cmd_delta_hand_pub.publish(d_hand_msg)
 
         if self.__quiet_on_zero:
             if is_quiet:

@@ -81,7 +81,7 @@ class JoyEventCallback:
                     res = self.__event == JoyEventCallback.DOUBLE_PRESS
                     next_state = JoyEventCallback.BUTTON_UP
                 else:
-                    res = self.__state == JoyEventCallback.BUTTON_UP
+                    res = self.__event == JoyEventCallback.BUTTON_UP
                     next_state = JoyEventCallback.BUTTON_UP
             elif self.__is_long_pressed__(msg):
                 res = self.__event == JoyEventCallback.LONG_PRESS

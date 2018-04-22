@@ -132,6 +132,8 @@ class PresetHandler:
                 tasks.append(MoveGroupState(task, robot, group))
             elif task_type == 'remember_move_group_state':
                 tasks.append(RememberMoveGroupState(task, robot, group))
+            elif task_type == 'publish_float64':
+                tasks.append(PublishFloat64(task))
             else:
                 msg = 'Task type {0} not implemented'.format(task_type)
                 rospy.logerr(msg)

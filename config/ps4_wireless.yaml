@@ -12,8 +12,6 @@ mapping:
   pitch: a5
   # Button 4 (R1) for plus (CCW), Button 5 (L1) for minus (CW)
   yaw: [b4, b5]
-  # Hand open (circle) and close (x)
-  hand: [b1, b2]
   # TODO: Support the following format
   # z:
   #   plus:
@@ -61,3 +59,9 @@ mapping:
       event: long_press
       duration: 3
       index: 8
+    open_hand:
+      event: button_up
+      index: 1
+    close_hand:
+      event: button_up
+      index: 2

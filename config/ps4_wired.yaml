@@ -12,8 +12,6 @@ mapping:
   pitch: a4
   # Button 4 (R1) for plus (CCW), Button 5 (L1) for minus (CW)
   yaw: [b4, b5]
-  # Hand open (circle) and close (x)
-  hand: [b0, b1]
 
   presets:
     # Center touch pad
@@ -41,3 +39,9 @@ mapping:
       event: long_press
       duration: 3
       index: 8
+    open_hand:
+      event: button_up
+      index: 0
+    close_hand:
+      event: button_up
+      index: 1
