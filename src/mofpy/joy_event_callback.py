@@ -120,11 +120,15 @@ class JoyEventCallback:
         """
         if self.__last_press_time is None:
             return True
-        return (msg.header.stamp - self.__last_press_time).to_sec() > 0.25
+        # Note: Ideally we want to use msg.header.stamp but time stamp is not
+        # updated when using autorepeat_rate
+        return (rospy.Time.now() - self.__last_press_time).to_sec() > 0.25
 
     def __is_long_pressed__(self, msg):
         if self.__press_duration is None or self.__press_start_time is None:
             return False
 
-        pressed_duration = msg.header.stamp - self.__press_start_time
+        # Note: Ideally we want to use msg.header.stamp but time stamp is not
+        # updated when using autorepeat_rate
+        pressed_duration = rospy.Time.now() - self.__press_start_time
         return pressed_duration.to_sec() > self.__press_duration
