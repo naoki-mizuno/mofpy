@@ -51,3 +51,17 @@ presets:
       execution_time: 2.5
     - type: sleep
       duration: 3.0
+  rotate_hand_right:
+    - type: single_point_trajectory
+      topic: quince_arm/controller/command
+      joints:
+        joint6: 0
+      frame_id: world
+      execution_time: 1.5
+  rotate_hand_left:
+    - type: single_point_trajectory
+      topic: quince_arm/controller/command
+      joints:
+        joint6: -3.1415
+      frame_id: world
+      execution_time: 1.5

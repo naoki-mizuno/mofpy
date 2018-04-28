@@ -26,13 +26,14 @@ mapping:
     ready_high:
       event: triple_press
       index: 2
-    # Option for custom pose
-    custom_1:
+    # Option
+    rotate_hand_left:
       event: triple_press
       index: 9
-    remember_custom_1:
+    # Option
+    rotate_hand_right:
       event: long_press
-      duration: 3
+      duration: 1
       index: 9
     # Share button
     recovery:

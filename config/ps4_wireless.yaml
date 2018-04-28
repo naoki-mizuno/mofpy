@@ -38,19 +38,18 @@ mapping:
     ready_high:
       event: triple_press
       index: 3
-    # Option for custom pose
+    # Option
+    rotate_hand_left:
+      event: triple_press
+      index: 9
+    rotate_hand_right:
+      event: long_press
+      duration: 1
+      index: 9
     custom_1:
       event: triple_press
-      index: 9
-    remember_custom_1:
-      event: long_press
-      duration: 3
-      index: 9
-    # PS button for custom pose 2
-    custom_2:
-      event: triple_press
       index: 12
-    remember_custom_2:
+    remember_custom_1:
       event: long_press
       duration: 3
       index: 12
