@@ -43,7 +43,6 @@ presets:
     - type: single_point_trajectory
       topic: quince_arm/controller/command
       joints:
-        joint3: -0.3
         joint4: 0
         joint5: 0
         joint6: -1.5707
