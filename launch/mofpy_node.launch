@@ -3,8 +3,11 @@
   <arg name="joy_dev" default="/dev/input/js0" />
   <!-- Choose from: ps4_wired, ps4_wireless, elecom_small -->
   <arg name="joypad_type" default="ps4_wired" />
+  <arg name="joint_states_topic" default="joint_states" />
 
   <node pkg="mofpy" type="mofpy_node.py" name="mofpy" output="screen" >
+    <remap from="joint_states" to="$(arg joint_states_topic)" />
+
     <rosparam command="load" file="$(find mofpy)/config/common.yaml" />
     <rosparam command="load" file="$(find mofpy)/config/$(arg joypad_type).yaml" />
   </node>

@@ -43,6 +43,11 @@ class SinglePointTrajectory(PresetTask):
         jtp = JointTrajectoryPoint()
         jtp.time_from_start = rospy.Duration.from_sec(self.__time_from_start)
         jtp.positions = self.__group.get_current_joint_values()
+        if len(jtp.positions) == 0:
+            rospy.logerr('Joint states not obtained. Are you sure'
+                         ' /joint_states topic is published?')
+            return
+
         # Only change the value of joints specified
         for joint_name in self.__joints.keys():
             idx = jt.joint_names.index(joint_name)
