@@ -58,6 +58,8 @@ presets:
         joint6: 1.57075++
       frame_id: arm/base_link
       execution_time: 1.5
+    - type: sleep
+      duration: 2.5
   rotate_hand_left:
     - type: single_point_trajectory
       topic: quince_arm/controller/command
@@ -66,3 +68,5 @@ presets:
         joint6: -1.57075++
       frame_id: arm/base_link
       execution_time: 1.5
+    - type: sleep
+      duration: 2.5
