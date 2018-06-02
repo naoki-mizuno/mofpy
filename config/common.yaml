@@ -3,7 +3,7 @@ frame_id: hand
 quiet_on_zero: true
 rate: 50
 scale:
-  translation: 0.10
+  translation: 0.05
   rotation: 0.15
   # translation: 0.05
   # rotation: 0.3
