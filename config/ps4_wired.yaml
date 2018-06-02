@@ -26,14 +26,13 @@ mapping:
     ready_high:
       event: triple_press
       index: 2
-    # Option
+    # Share
     rotate_hand_left:
       event: triple_press
-      index: 9
+      index: 8
     # Option
     rotate_hand_right:
-      event: long_press
-      duration: 1
+      event: triple_press
       index: 9
     # Share button
     recovery:
