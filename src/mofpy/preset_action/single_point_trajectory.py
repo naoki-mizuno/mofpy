@@ -51,7 +51,13 @@ class SinglePointTrajectory(PresetTask):
         # Only change the value of joints specified
         for joint_name in self.__joints.keys():
             idx = jt.joint_names.index(joint_name)
-            jtp.positions[idx] = self.__joints[joint_name]
+            ang = self.__joints[joint_name]
+            if type(ang) is float or type(ang) is int:
+                jtp.positions[idx] = ang
+            elif ang.endswith('++'):
+                jtp.positions[idx] += float(ang[:-2])
+            else:
+                raise ValueError("String {0} doesn't end with ++".format(ang))
 
         jt.points.append(jtp)
 

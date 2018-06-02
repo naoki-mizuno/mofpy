@@ -54,13 +54,15 @@ presets:
     - type: single_point_trajectory
       topic: quince_arm/controller/command
       joints:
-        joint6: 0
+        # +90 deg from current
+        joint6: 1.57075++
       frame_id: arm/base_link
       execution_time: 1.5
   rotate_hand_left:
     - type: single_point_trajectory
       topic: quince_arm/controller/command
       joints:
-        joint6: -3.1415
+        # -90 deg from current
+        joint6: -1.57075++
       frame_id: arm/base_link
       execution_time: 1.5
