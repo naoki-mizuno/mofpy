@@ -1,11 +1,14 @@
 import rospy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from moveit_commander.move_group import MoveGroupCommander
 
-from .preset_task import PresetTask
+from .action import Action
+from ..move_group_utils import MoveGroupUtils
+from ..shared import Shared
 
 
-class SinglePointTrajectory(PresetTask):
+class SinglePointTrajectory(Action):
+    NAME = 'single_point_trajectory'
+
     """
     Publishes a JointTrajectory message to the specified topic
 
@@ -18,7 +21,7 @@ class SinglePointTrajectory(PresetTask):
     :type __joints: dict
     :type __group: MoveGroupCommander
     """
-    def __init__(self, definition, group):
+    def __init__(self, definition):
         super(SinglePointTrajectory, self).__init__(definition)
 
         self.__topic_name = self.get_required_key('topic')
@@ -28,13 +31,17 @@ class SinglePointTrajectory(PresetTask):
             rospy.logwarn('frame_id not found for single_point_trajectory.'
                           ' Using {0}'.format(self.__frame_id))
         self.__joints = self.get_required_key('joints')
-        self.__group = group
+        self.__group = MoveGroupUtils.group
 
         self.__pub = rospy.Publisher(self.__topic_name,
                                      JointTrajectory,
                                      queue_size=1)
 
-    def execute(self):
+    def execute(self, named_joy=None):
+        if Shared.get('move_group_disabled'):
+            rospy.logerr('move_group disabled; not publishing trajectory')
+            return
+
         jt = JointTrajectory()
         jt.header.stamp = rospy.Time.now()
         jt.header.frame_id = self.__frame_id
@@ -62,3 +69,6 @@ class SinglePointTrajectory(PresetTask):
         jt.points.append(jtp)
 
         self.__pub.publish(jt)
+
+
+Action.register_preset(SinglePointTrajectory)

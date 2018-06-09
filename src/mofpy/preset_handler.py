@@ -1,47 +1,50 @@
 import rospy
-from moveit_commander import roscpp_initializer
-from moveit_commander.robot import RobotCommander
-from moveit_commander.move_group import MoveGroupCommander
 
-from .joy_event_callback import JoyEventCallback
-from .preset_action import *
+from .action import *
+from .event_manager import EventManager
+from .named_mapping import NamedMappings
+from .move_group_utils import MoveGroupUtils
+from .shared import Shared
 
-import sys
+from threading import Thread, Lock
 
 
 class PresetHandler:
     """
-    :type __callbacks: list[JoyEventCallback]
-    :type __presets: dict[str, list[PresetTask]]
+    :type __joy_namer: NamedMappings
+    :type __presets: dict[str, list[Action]]
     """
-    def __init__(self):
+    def __init__(self, joy_names):
+        self.__joy_namer = joy_names
         self.__callbacks = []
+        self.__named_joy = None
+        self.__named_joy_lock = Lock()
 
-        roscpp_initializer.roscpp_initialize(sys.argv)
-        move_group_name = rospy.get_param('~presets/move_group_name')
-        self.__robot, self.__group = PresetHandler.__connect_to_move_group__(
-            move_group_name
-        )
+        self.__presets = dict()
+        self.__check_rate = rospy.Rate(rospy.get_param('~check_rate', 100))
+        timeout_press = rospy.get_param('~timeout/press', 0.05)
+        timeout_sequence = rospy.get_param('~timeout/sequence', 0.20)
+        self.__event_manager = EventManager(timeout_press, timeout_sequence)
+        move_group_name = rospy.get_param('~move_group_name', None)
+        connected = MoveGroupUtils.connect(move_group_name)
+        if not connected:
+            Shared.add('move_group_disabled', True)
 
-        # MoveGroupCommander has failed to initialize
-        if self.__group is None:
-            return
+        self.__trigger_monitor = Thread(target=self.__trigger_spin__)
+        self.__trigger_monitor.start()
 
-        self.__presets = PresetHandler.read_presets(
-            self.__robot, self.__group
-        )
-
-    def register_callback(self, callback):
+    def bind_presets(self, definition):
         """
-        Registers a callback when a button event is triggered
-
-        :param callback:
-        :type callback: JoyEventCallback
+        Binds the triggers (input commands) to the preset to be executed
+        :param definition:
+        :return:
         """
-        self.__callbacks.append(callback)
+        for preset_name in definition.keys():
+            trigger, preset = PresetHandler.__read_preset__(preset_name)
+            self.__presets[preset_name] = preset
 
-    def remove_callback(self, callback):
-        self.__callbacks.remove(callback)
+            trigger = definition[preset_name]['trigger']
+            self.__event_manager.register(preset_name, trigger)
 
     def handle(self, msg):
         """
@@ -49,92 +52,61 @@ class PresetHandler:
         :param msg: Joy message
         :type msg: Joy
         """
-        for callback in self.__callbacks:
-            if callback.check(msg):
-                callback.call()
+        named_joy = self.__joy_namer.convert(msg)
+        self.__event_manager.append(named_joy['buttons'])
 
-    def execute(self, preset_name):
-        if preset_name not in self.__presets:
-            rospy.logerr('{0} not found in presets'.format(preset_name))
-            return
+        self.__named_joy_lock.acquire(True)
+        self.__named_joy = named_joy
+        self.__named_joy_lock.release()
 
-        for preset in self.__presets[preset_name]:
-            preset.execute()
+    def __trigger_spin__(self):
+        while not rospy.is_shutdown():
+            triggered_presets = self.__event_manager.get_triggered()
 
-    def register_mappings(self, mappings):
-        """
-        :type mappings: dict[str, dict[str, int | str]]
-        """
-        for preset_name in mappings.keys():
-            button = mappings[preset_name]['index']
-            event = mappings[preset_name]['event']
-            if event == JoyEventCallback.LONG_PRESS:
-                duration = mappings[preset_name]['duration']
-            else:
-                duration = None
+            # TODO: Remove this part! Only for debugging
+            if len(triggered_presets) != 0:
+                print(triggered_presets)
 
-            cb = JoyEventCallback(button=button,
-                                  event=event,
-                                  callback=self.execute,
-                                  callback_args=(preset_name,),
-                                  press_duration=duration)
-            self.register_callback(cb)
+            # Presets that are triggered by commands
+            for preset_name in triggered_presets:
+                if preset_name not in self.__presets:
+                    rospy.logerr(preset_name + ' not found in presets')
+                    return
 
-    @staticmethod
-    def __connect_to_move_group__(move_group_name):
-        robot = RobotCommander()
+                # Execute each action
+                for preset_action in self.__presets[preset_name]:
+                    preset_action.execute()
 
-        # Sometimes, MoveGroupCommander fails to initialize when Rviz
-        # startup is too slow. Try several times and then give up.
-        attempt = 0
-        while attempt <= 3:
-            try:
-                group = MoveGroupCommander(move_group_name)
-                return robot, group
-            except RuntimeError as e:
-                rospy.logwarn(e)
-                rospy.logwarn('Trying again to initialize MoveGroupCommander')
-                attempt += 1
+            # Presets that are always triggered
+            self.__named_joy_lock.acquire(True)
+            for preset_name in self.__event_manager.get_any_triggered():
+                if preset_name not in self.__presets:
+                    rospy.logerr(preset_name + ' not found in presets')
+                    return
+                for preset_action in self.__presets[preset_name]:
+                    if self.__named_joy is not None:
+                        preset_action.execute(self.__named_joy)
+            # Don't trigger the 'any' presets until a new message is received
+            self.__named_joy = None
+            self.__named_joy_lock.release()
 
-        msg = 'Could not connect to MoveGroupCommander. Disabling presets'
-        rospy.logwarn(msg)
-        return robot, None
+            self.__check_rate.sleep()
 
     @staticmethod
-    def read_presets(robot, group):
-        preset_definitions = rospy.get_param('~presets', dict())
-        preset_actions = dict()
-        for preset_name in preset_definitions.keys():
-            if preset_name == 'move_group_name':
-                continue
-
-            preset = PresetHandler.__read_preset__(preset_name,
-                                                   robot,
-                                                   group)
-            preset_actions[preset_name] = preset
-        return preset_actions
-
-    @staticmethod
-    def __read_preset__(preset_name, robot, group):
-        tasks = []
+    def __read_preset__(preset_name):
+        actions = []
         preset = rospy.get_param('~presets/{0}'.format(preset_name))
-        for task in preset:
-            # TODO: trajectory, command
-            if 'type' not in task:
+        trigger = preset['trigger']
+        for action_definition in preset['action']:
+            if 'type' not in action_definition:
                 rospy.logerr('Required key "type" not set')
                 continue
-            task_type = task['type']
-            if task_type == 'single_point_trajectory':
-                tasks.append(SinglePointTrajectory(task, group))
-            elif task_type == 'sleep':
-                tasks.append(Sleep(task))
-            elif task_type == 'move_group_state':
-                tasks.append(MoveGroupState(task, robot, group))
-            elif task_type == 'remember_move_group_state':
-                tasks.append(RememberMoveGroupState(task, robot, group))
-            elif task_type == 'publish_float64':
-                tasks.append(PublishFloat64(task))
-            else:
-                msg = 'Task type {0} not implemented'.format(task_type)
+            action_type = action_definition['type']
+            cls = Action.actions[action_type]
+            if action_type not in Action.actions:
+                msg = 'Action type {0} not implemented'.format(action_type)
                 rospy.logerr(msg)
-        return tasks
+            else:
+                actions.append(cls(action_definition))
+
+        return trigger, actions

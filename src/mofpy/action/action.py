@@ -1,17 +1,28 @@
 from abc import *
 
 
-class PresetTask(object):
+class Action(object):
+    # Make sure to define the NAME in the derived class!
+    NAME = ''
+    actions = {}
+
     def __init__(self, definition):
         """
-        Define a task
+        Define a action
 
         :param definition: a dictionary containing the description of action
         """
         self.definition = definition
 
     @abstractmethod
-    def execute(self):
+    def execute(self, named_joy=None):
+        """
+        Method that is called when a preset is triggered.
+        The behavior of the method should be defined in the derived class, and
+        the required parameters should be retrieved in the __init__ method of
+        the derived class.
+        :param named_joy:
+        """
         raise NotImplementedError()
 
     def get_required_key(self, key_name):
@@ -38,3 +49,10 @@ class PresetTask(object):
             definition = definition[key]
 
         return definition, True
+
+    @staticmethod
+    def register_preset(cls):
+        if cls.NAME == '':
+            msg = 'NAME not defined for class {0}'.format(cls.__name__)
+            raise ValueError(msg)
+        Action.actions[cls.NAME] = cls

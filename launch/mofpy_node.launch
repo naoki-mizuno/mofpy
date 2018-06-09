@@ -9,6 +9,7 @@
     <remap from="joint_states" to="$(arg joint_states_topic)" />
 
     <rosparam command="load" file="$(find mofpy)/config/common.yaml" />
+    <rosparam command="load" file="$(find mofpy)/config/presets/arm.yaml" />
     <rosparam command="load" file="$(find mofpy)/config/$(arg joypad_type).yaml" />
   </node>
 

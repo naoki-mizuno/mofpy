@@ -1,18 +1,23 @@
 import rospy
 
+from .action import Action
 
-from .preset_task import PresetTask
 
+class Sleep(Action):
+    NAME = 'sleep'
 
-class Sleep(PresetTask):
     """
     :type __duration: float
     """
     def __init__(self, definition):
         super(Sleep, self).__init__(definition)
+        Action.actions[self.__class__.NAME] = self.__class__
 
         self.__duration = self.get_required_key('duration')
 
-    def execute(self):
+    def execute(self, named_joy=None):
         rospy.loginfo('Sleeping for {0} seconds'.format(self.__duration))
         rospy.sleep(self.__duration)
+
+
+Action.register_preset(Sleep)

@@ -1,72 +1,21 @@
-frame_id: hand
-# Don't publish twist if no change is commanded
-quiet_on_zero: true
 rate: 50
-scale:
-  translation: 0.05
-  rotation: 0.15
-  # translation: 0.05
-  # rotation: 0.3
+# Note: Comment out to disable move_group-related presets
+# move_group_name: arm
+timeout:
+  press: 0.1
+  sequence: 0.2
 
 presets:
-  move_group_name: arm
-  open_hand:
-    - type: publish_float64
-      topic: quince_arm/hand_controller/command
-      value: 0.2
-  close_hand:
-    - type: publish_float64
-      topic: quince_arm/hand_controller/command
-      value: -1.8
-  initial:
-    - type: move_group_state
-      state_name: initial
-  ready_low:
-    - type: move_group_state
-      state_name: ready_low
-  ready_high:
-    - type: move_group_state
-      state_name: ready_high
-  custom_1:
-    - type: move_group_state
-      state_name: custom_1
-  custom_2:
-    - type: move_group_state
-      state_name: custom_2
-  remember_custom_1:
-    - type: remember_move_group_state
-      state_name: custom_1
-  remember_custom_2:
-    - type: remember_move_group_state
-      state_name: custom_2
-  recovery:
-    - type: single_point_trajectory
-      topic: quince_arm/controller/command
-      joints:
-        joint4: 0
-        joint5: 0
-        joint6: -1.5707
-      frame_id: arm/base_link
-      execution_time: 2.5
-    - type: sleep
-      duration: 3.0
-  rotate_hand_right:
-    - type: single_point_trajectory
-      topic: quince_arm/controller/command
-      joints:
-        # +90 deg from current
-        joint6: 1.57075++
-      frame_id: arm/base_link
-      execution_time: 1.5
-    - type: sleep
-      duration: 2.5
-  rotate_hand_left:
-    - type: single_point_trajectory
-      topic: quince_arm/controller/command
-      joints:
-        # -90 deg from current
-        joint6: -1.57075++
-      frame_id: arm/base_link
-      execution_time: 1.5
-    - type: sleep
-      duration: 2.5
+  switch_twist_mode:
+    trigger: [[R1, R2, L1, L2], 1]
+    action:
+      - type: set_shared
+        key: twist_mode
+        value: ['body', 'arm']
+  super:
+    # Dummy
+    trigger: [C_U, C_U, C_D, C_D, C_L, C_R, C_L, C_R, X, O]
+    action:
+      - type: publish_float64
+        topic: foo
+        value: 42

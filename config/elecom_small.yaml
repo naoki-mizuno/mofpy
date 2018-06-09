@@ -1,48 +1,32 @@
-mapping:
-  # Left Stick Up/Down
-  x: a1
-  # Left Stick Left/Right
-  y: a0
-  # Axis 4 (R2) for plus, axis 3 (L2) for minus
-  # Active-low with button counterparts
-  z: [b7, b6]
-  # Axis 2 (Right Stick Left/Right) inverse
-  roll: -a2
-  # Axis 5 (Right Stick Up/Down)
-  pitch: a3
-  # Button 4 (R1) for plus (CCW), Button 5 (L1) for minus (CW)
-  yaw: [b5, b4]
-
-  presets:
-    # Center touch pad
-    initial:
-      event: triple_press
-      index: 10
+joy:
+  axes:
+    # Left Stick Left/Right
+    0: LSH
+    # Left Stick Up/Down
+    1: LSV
+    # Right Stick Left/Right
+    2: RSH
+    # Right Stick Up/Down
+    3: RSV
+  buttons:
     # Square
-    ready_low:
-      event: triple_press
-      index: 0
+    0: Q
     # Triangle
-    ready_high:
-      event: triple_press
-      index: 1
-    # Option
-    rotate_hand_left:
-      event: triple_press
-      index: 9
-    # Option
-    rotate_hand_right:
-      event: long_press
-      duration: 1
-      index: 9
-    # Share button
-    recovery:
-      event: long_press
-      duration: 3
-      index: 8
-    open_hand:
-      event: button_up
-      index: 2
-    close_hand:
-      event: button_up
-      index: 3
+    1: T
+    2: X
+    3: O
+    4:
+      name: R1
+      as: axis
+    5:
+      name: L1
+      as: axis
+    6:
+      name: R2
+      as: axis
+    7:
+      name: L2
+      as: axis
+    8: SH
+    9: OP
+    10: PS

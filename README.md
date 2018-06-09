@@ -1,118 +1,166 @@
 # mofpy
 
-Convert a Joy command to Twist. And more.
+Generic-joypad-input-to-whatever node, where whatever can be, but not limited
+to:
+
+- publishing twist messages for a 6DOF manipulator
+- moving the manipulator to a certain state using the move_group commander
+- publishing values to topics
+- ...and whatever you define!
 
 
 ## Description
 
-The package converts inputs from a joypad to a 6DOF velocity command (Twist)
-using a predefined mapping. It was developed to control the end-effector of a
-manipulator, but it can be used for any application that requires a 6DOF
-control.
-
-It also has a feature where presets (which is a set of tasks) can be executed
-on certain events such as long-pressing, triple-pressing, etc. some buttons.
+TODO
 
 
-## Mapping for Twist
+## Defining the Axes and Buttons
 
-The mapping is done using ROS parameters, so they can be written in a YAML
-file. Let's jump into examples:
+The first thing you need to do is give each physical axes and buttons a name.
+You only need to do this for the ones that you are going to use, but it is
+recommended that you name all your axes and buttons.
+
+### Normal Case
+
+Normally, you would use an axis as an axis and a button as a button:
 
 ```yaml
-mapping:
-  x: a1
-  y: a0
-  z: [a5al7, a2al6]
-  roll: -a3
-  pitch: a4
-  yaw: [b4, b5]
+virtual:
+  axes:
+    AXIS_NAME:
+      real:
+        type: axis
+        index: 0
+  buttons:
+    BUTTON_NAME:
+      real:
+        type: button
+        index: 0
 ```
 
+`AXIS_NAME` is the name of the virtual axis/button, which is bound to the
+physical axis 0. Similarly, `BUTTON_NAME` is the name given to button 0.
 
-### The basics
+### Special Case
 
-The basic syntax is to just write the joypad axis that controls a certain
-axis. `x: a1` indicates that axis 1 (which is the vertical movement of the
-left stick) controls the `x` output. Same is for `y: a0`.
-
-
-### Inverted axes
-
-To express inverted axes, use the `-` sign. `roll: -a3` says that the roll
-(`twist.angular.x`) is set to -1 times the value of axis 3.
-
-
-### Buttons
-
-Skipping to the last line, `yaw: [b4, b5]` indicates that button 4 is used to
-control the plus direction of yaw (`twist.angular.z`) and button 5 for the
-minus direction. When pressed, either a yaw value of 1 or -1 is set in the
-twist.
-
-
-### Active-low
-
-This is where it gets a bit tricky. Some axes are active-low, meaning that
-they are high (1.0) when NOT pressed and low (-1.0) when pressed. To indicate
-active-low axes, use `aXal`, where `X` is the axis number.
-
-However, there is a problem where active-low axes output 0 before being
-pressed for the first time (rather than outputting -1.0). The only way to tell
-whether an active-low axis has been pressed for the first time is to monitor
-the buttons, because the button counterpart should be the inverse of the axis
-(that is, the button outputs 0 when an active-low axis is non-zero, and
-outputs 1 when the axis is 0). To add a button counterpart, use `aXalY`, where
-`X` is the axis number and `Y` is the button number.
-
-
-## Defining and Mapping Presets
-
-The mapping of presets is done in two parts: the definition of the preset and
-the mapping of that preset to a button event. Take a look at the following
-example:
+In special cases, sometimes you want to use an axis as a button or the other
+way around.
 
 ```yaml
-mapping:
-  presets:
-    foo:
-      event: double_press
-      index: 3
+virtual:
+  axes:
+    PHYSICAL_BUTTON:
+      real:
+        type: button
+        index: 1
+  buttons:
+    PHYSICAL_AXIS:
+      real:
+        type: axis
+        index: 1
+      low_range: [0, 0.5]
+      high_range: [0.5, 1]
+```
 
+`PHYSICAL_BUTTON` is an example of using a button as axis. When the button is
+pressed, the axis value is 1.0, otherwise 0.0. `PHYSICAL_AXIS` is using an
+axis as a button. If the axis value is within the `low_range`, it is low (i.e.
+considered unpressed) and if it's within `high_range`, it is high.
+
+
+## Using the Bundled Presets
+
+Once you've given names to the axes and buttons, you can use those names to
+trigger certain presets. A "preset," which is "triggered" by a "command",
+consists of multiple "actions." Following are some simple preset definitions
+that publishes a `Float64` message to the `foo` topic:
+
+```yaml
 presets:
-  foo:
-    - type: sleep
-      duration: 1.5
-    - type: move_group_state
-      state_name: my_joint_pos
+  single_press:
+    # Single short press
+    trigger: R1
+    action:
+      - type: publish_float64
+        topic: foo
+        value: 42
+  multiple_press:
+    # Sequential button press
+    trigger: [R1, L1, R1, L1]
+    action:
+      - type: publish_float64
+        topic: foo
+        value: 42
+  long_press:
+    # Long press for 1 second
+    trigger: [R1, 1]
+    action:
+      - type: publish_float64
+        topic: foo
+        value: 42
+  multiple_long_press:
+    # Long press R1 and L1 simultaneously for 1 second
+    trigger: [[R1, L1], 1]
+    action:
+      - type: publish_float64
+        topic: foo
+        value: 42
+      - type: publish_float64
+        topic: foo
+        value: 43
 ```
 
-`event` can be one of the following: `button_down`, `button_up`,
-`double_press`, `triple_press`, `long_press`. `long_press` requires an
-additional parameter `duration`. `index` is the zero-based button index.
+In `multiple_long_press`, pressing `R1` and `L1` simultaneously for  1 second
+will publish the value `42` to `foo` topic, immediately followed by another
+message published to the `foo` topic with the value `43`.
 
-In the `presets` parameter, we specify the tasks to be executed when the
-preset is called. In the example above, `foo` consists of a `sleep` and
-`move_group_state` task. `sleep` is pretty self-explanatory.
-`move_group_state` uses `move_group` to move to a named joint state (they are
-defined in the srdf file in moveit config).
 
-The available types are:
+## Defining a Preset
 
-- `move_group_state`: Moves to a named joint position.
-  - `state_name`: The name of the predefined joint position.
-- `remember_move_group_state`: Remembers the current joint position in the
-  - `state_name`: The name of the predefined joint position.
-- `sleep`: Uses `rospy.sleep` to sleep for a certain duration.
-  - `duration`: How long to sleep for.
-  given name.
-- `single_point_trajectory`: Publishes a JointTrajectory topic containing one
-  point.
-  - `topic`: Topic to publish to
-  - `joints`: A dictionary of the joint names and their desired values.
-  - `frame_id`: The frame ID of the message.
-  - `execution_time`: How much time to spend on the execution. The value is
-    used for the `time_from_start` field in the JointTrajectoryPoint message.
+1. Create a file in `src/mofpy/action/`
+2. Define a class that inherits from `Action`
+3. Define a class variable named `NAME` containing the name of the preset
+4. Define the `__init__` method which takes a dictionary as an argument
+5. Override the `execute` method
+6. Add `Action.register_preset(YOUR CLASS)` at the end of the file
+
+Here's an example:
+
+```python
+from .action import Action
+
+
+class Foobar(Action):
+    NAME = 'foobar'
+
+    def __init__(self, definition):
+        super(Foobar, self).__init__(definition)
+        Action.actions[self.__class__.NAME] = self.__class__
+
+        # You can retrieve parameters
+        self.__my_param = self.get_required_key('my_param')
+
+    def execute(self, named_joy=None):
+        print('foobar called! my_param == {0}'.format(self.__my_param))
+
+
+Action.register_preset(Foobar)
+```
+
+This action can be used like this:
+
+```yaml
+presets:
+  trigger_foobar:
+    trigger: [O, X]
+    action:
+      - type: foobar
+        my_param: 42
+```
+
+When `O` followed by a `X` is pressed, this will trigger the `trigger_foobar`
+preset, which executes the `foobar` action. Note that `my_param` must be
+defined otherwise it will raise an exception.
 
 
 ## License
