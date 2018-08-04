@@ -37,13 +37,23 @@ class NamedMappings:
         # Axes
         for k in self.__v_axes.keys():
             va = self.__v_axes[k]
-            va.update_value(msg)
+            try:
+                va.update_value(msg)
+            except IndexError:
+                msg = 'Invalid axis index {0} for {1}'.format(va.real_index,
+                                                              va.name)
+                raise IndexError(msg)
             new_axes[va.name] = va
 
         # Buttons
         for k in self.__v_buttons.keys():
             vb = self.__v_buttons[k]
-            vb.update_value(msg)
+            try:
+                vb.update_value(msg)
+            except IndexError:
+                msg = 'Invalid button index {0} for {1}'.format(vb.real_index,
+                                                                vb.name)
+                raise IndexError(msg)
             new_buttons[vb.name] = vb
 
         named_joy = {
