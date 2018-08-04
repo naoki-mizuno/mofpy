@@ -228,4 +228,6 @@ class EventManager:
             float(sequence[1])
         except ValueError:
             return False
+        except TypeError:
+            return False
         return True
