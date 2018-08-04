@@ -11,14 +11,14 @@ class ArmTwist(Action):
     def __init__(self, definition):
         super(ArmTwist, self).__init__(definition)
 
-        self.__frame_id, _ = self.get_key('frame_id', 'world')
-        self.__scale_trn, _ = self.get_key('scale/translation', 0.1)
-        self.__scale_rot, _ = self.get_key('scale/rotation', 0.01)
-        self.__quiet_on_zero, _ = self.get_key('quiet_on_zero', True)
+        self.__frame_id = self.get('frame_id', 'world')
+        self.__scale_trn = self.get('scale/translation', 0.1)
+        self.__scale_rot = self.get('scale/rotation', 0.01)
+        self.__quiet_on_zero = self.get('quiet_on_zero', True)
         self.__mapping = self.__mapping__()
         self.__published_zero = False
 
-        is_default, _ = self.get_key('is_default_twist_mode', False)
+        is_default = self.get('is_default_twist_mode', False)
         if is_default:
             Shared.add('twist_mode', 'arm')
 
@@ -47,7 +47,7 @@ class ArmTwist(Action):
         self.__published_zero = False
 
     def __mapping__(self):
-        params, found = self.get_key('mapping', dict())
+        params = self.get('mapping', dict())
         mapping = {}
         for key in params.keys():
             val = params[key]

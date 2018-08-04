@@ -25,13 +25,13 @@ class SinglePointTrajectory(Action):
     def __init__(self, definition):
         super(SinglePointTrajectory, self).__init__(definition)
 
-        self.__topic_name = self.get_required_key('topic')
-        self.__time_from_start = self.get_required_key('execution_time')
-        self.__frame_id, found = self.get_key('frame_id', 'world')
-        if not found:
+        self.__topic_name = self.get_required('topic')
+        self.__time_from_start = self.get_required('execution_time')
+        self.__frame_id = self.get('frame_id', 'world')
+        if not self.has('frame_id'):
             rospy.logwarn('frame_id not found for single_point_trajectory.'
                           ' Using {0}'.format(self.__frame_id))
-        self.__joints = self.get_required_key('joints')
+        self.__joints = self.get_required('joints')
         self.__group = MoveGroupUtils.group
 
         self.__pub = rospy.Publisher(self.__topic_name,

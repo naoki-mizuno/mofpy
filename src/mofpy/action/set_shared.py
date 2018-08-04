@@ -15,8 +15,8 @@ class SetShared(Action):
         super(SetShared, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__
 
-        self.__key = self.get_required_key('key')
-        value = self.get_required_key('value')
+        self.__key = self.get_required('key')
+        value = self.get_required('value')
         if isinstance(value, six.string_types):
             self.__value = [value]
         else:

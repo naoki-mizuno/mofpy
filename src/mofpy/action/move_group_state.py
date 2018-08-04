@@ -20,8 +20,8 @@ class MoveGroupState(Action):
 
         self.__robot = MoveGroupUtils.robot
         self.__group = MoveGroupUtils.group
-        self.__state_name = self.get_required_key('state_name')
-        self.__action, _ = self.get_key('action', 'move')
+        self.__state_name = self.get_required('state_name')
+        self.__action = self.get('action', 'move')
 
     def execute(self, named_joy=None):
         if Shared.get('move_group_disabled'):

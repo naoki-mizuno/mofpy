@@ -138,7 +138,7 @@ class Foobar(Action):
         Action.actions[self.__class__.NAME] = self.__class__
 
         # You can retrieve parameters
-        self.__my_param = self.get_required_key('my_param')
+        self.__my_param = self.get_required('my_param')
 
     def execute(self, named_joy=None):
         print('foobar called! my_param == {0}'.format(self.__my_param))

@@ -17,8 +17,8 @@ class PublishFloat64(Action):
         super(PublishFloat64, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__
 
-        self.__topic_name = self.get_required_key('topic')
-        self.__value = self.get_required_key('value')
+        self.__topic_name = self.get_required('topic')
+        self.__value = self.get_required('value')
 
         self.__pub = rospy.Publisher(self.__topic_name,
                                      Float64,

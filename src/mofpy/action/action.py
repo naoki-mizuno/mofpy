@@ -25,30 +25,38 @@ class Action(object):
         """
         raise NotImplementedError()
 
-    def get_required_key(self, key_name):
-        val, found = self.get_key(key_name)
-
-        if not found:
+    def get_required(self, key_name):
+        if not self.has(key_name):
             msg = 'Missing required key "{0}"'.format(key_name)
             raise KeyError(msg)
 
+        val = self.get(key_name)
+
         return val
 
-    def get_key(self, key_name, default_val=None):
+    def get(self, key_name, default_val=None):
         """
-        Get the value in self.definiton from a slash-separated key
+        Get the value in self.definition from a slash-separated key
         :param key_name: slash-separated key name
         :param default_val: value to be used if key is not found
-        :return: The value and whether the key was found or not
+        :return: The value
         """
         definition = self.definition
 
         for key in key_name.split('/'):
             if key not in definition:
-                return default_val, False
+                return default_val
             definition = definition[key]
 
-        return definition, True
+        return definition
+
+    def has(self, key_name):
+        definition = self.definition
+        for key in key_name.split('/'):
+            if key not in definition:
+                return False
+            definition = definition[key]
+        return True
 
     @staticmethod
     def register_preset(cls):

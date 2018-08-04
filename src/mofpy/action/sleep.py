@@ -14,7 +14,7 @@ class Sleep(Action):
         super(Sleep, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__
 
-        self.__duration = self.get_required_key('duration')
+        self.__duration = self.get_required('duration')
 
     def execute(self, named_joy=None):
         rospy.loginfo('Sleeping for {0} seconds'.format(self.__duration))
