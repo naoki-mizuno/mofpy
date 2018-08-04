@@ -5,13 +5,14 @@ from .action import Action
 
 
 class PublishFloat64(Action):
-    NAME = 'publish_float64'
-
     """
     Publishes a Float64 message to the specified topic
 
     :type __topic_name: str
     """
+
+    NAME = 'publish_float64'
+
     def __init__(self, definition):
         super(PublishFloat64, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__

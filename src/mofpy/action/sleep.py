@@ -4,11 +4,12 @@ from .action import Action
 
 
 class Sleep(Action):
-    NAME = 'sleep'
-
     """
     :type __duration: float
     """
+
+    NAME = 'sleep'
+
     def __init__(self, definition):
         super(Sleep, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__

@@ -5,11 +5,12 @@ import six
 
 
 class SetShared(Action):
-    NAME = 'set_shared'
-
     """
     :type __duration: float
     """
+
+    NAME = 'set_shared'
+
     def __init__(self, definition):
         super(SetShared, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__

@@ -7,12 +7,13 @@ from ..shared import Shared
 
 
 class MoveGroupState(Action):
-    NAME = 'move_group_state'
-
     """
     :type __robot: RobotCommander
     :type __group: MoveGroupCommander
     """
+
+    NAME = 'move_group_state'
+
     def __init__(self, definition):
         super(MoveGroupState, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__

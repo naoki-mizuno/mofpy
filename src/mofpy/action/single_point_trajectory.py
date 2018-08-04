@@ -7,8 +7,6 @@ from ..shared import Shared
 
 
 class SinglePointTrajectory(Action):
-    NAME = 'single_point_trajectory'
-
     """
     Publishes a JointTrajectory message to the specified topic
 
@@ -21,6 +19,9 @@ class SinglePointTrajectory(Action):
     :type __joints: dict
     :type __group: MoveGroupCommander
     """
+
+    NAME = 'single_point_trajectory'
+
     def __init__(self, definition):
         super(SinglePointTrajectory, self).__init__(definition)
 
