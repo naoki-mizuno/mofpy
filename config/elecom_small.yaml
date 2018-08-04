@@ -1,32 +1,133 @@
-joy:
+virtual:
   axes:
     # Left Stick Left/Right
-    0: LSH
+    LSH:
+      real:
+        type: axis
+        index: 0
     # Left Stick Up/Down
-    1: LSV
+    LSV:
+      real:
+        type: axis
+        index: 1
     # Right Stick Left/Right
-    2: RSH
+    RSH:
+      real:
+        type: axis
+        index: 2
     # Right Stick Up/Down
-    3: RSV
+    RSV:
+      real:
+        type: axis
+        index: 3
+    L1:
+      real:
+        type: button
+        index: 4
+    R1:
+      real:
+        type: button
+        index: 5
+    L2:
+      real:
+        type: button
+        index: 6
+    R2:
+      real:
+        type: button
+        index: 7
   buttons:
-    # Square
-    0: Q
+    X:
+      real:
+        type: button
+        index: 2
+    O:
+      real:
+        type: button
+        index: 3
     # Triangle
-    1: T
-    2: X
-    3: O
-    4:
-      name: R1
-      as: axis
-    5:
-      name: L1
-      as: axis
-    6:
-      name: R2
-      as: axis
-    7:
-      name: L2
-      as: axis
-    8: SH
-    9: OP
-    10: PS
+    T:
+      real:
+        type: button
+        index: 1
+    # Square
+    Q:
+      real:
+        type: button
+        index: 0
+    L1:
+      real:
+        type: button
+        index: 4
+    R1:
+      real:
+        type: button
+        index: 5
+    L2:
+      real:
+        type: button
+        index: 6
+    R2:
+      real:
+        type: button
+        index: 7
+    SH:
+      real:
+        type: button
+        index: 8
+    OP:
+      real:
+        type: button
+        index: 9
+    PS:
+      real:
+        type: button
+        # Non-existant?
+        index: 12
+    # Left Stick Press
+    LSP:
+      real:
+        type: button
+        index: 10
+    # Right Stick Press
+    RSP:
+      real:
+        type: button
+        index: 11
+    # Right cursor button
+    C_R:
+      real:
+        type: axis
+        index: 4
+      low_range: [-0.1, 0.0]
+      high_range: [-1.0, -0.1]
+    # Left cursor button
+    C_L:
+      real:
+        type: axis
+        index: 4
+      low_range: [0.0, 0.1]
+      high_range: [0.1, 1.0]
+    # Up cursor button
+    C_U:
+      real:
+        type: axis
+        index: 5
+      low_range: [0.0, 0.1]
+      high_range: [0.1, 1.0]
+    # Down cursor button
+    C_D:
+      real:
+        type: axis
+        index: 5
+      low_range: [-0.1, 0.0]
+      high_range: [-1.0, -0.1]
+
+presets:
+  # Because there's no PS button
+  initial:
+    trigger: [[LSP, RSP], [LSP, RSP]]
+    action:
+      - type: move_group_state
+        state_name: initial
+        action: move
