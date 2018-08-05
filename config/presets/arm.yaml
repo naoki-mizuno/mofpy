@@ -1,0 +1,110 @@
+presets:
+  arm_twist:
+    trigger: any
+    action:
+      - type: arm_twist
+        frame_id: hand
+        # Don't publish twist if no change is commanded
+        quiet_on_zero: true
+        scale:
+          translation: 0.05
+          rotation: 0.15
+        mapping:
+          x: LSV
+          y: -LSH
+          z: [R2, -L2]
+          R: RSH
+          P: RSV
+          Y: [R1, -L1]
+        is_default_twist_mode: true
+  open_hand:
+    trigger: O
+    action:
+      - type: publish_float64
+        topic: quince_arm/hand_controller/command
+        value: 0.2
+  close_hand:
+    trigger: X
+    action:
+      - type: publish_float64
+        topic: quince_arm/hand_controller/command
+        value: -1.8
+  initial:
+    trigger: [PS, PS, PS]
+    action:
+      - type: move_group_state
+        state_name: initial
+        action: move
+  ready_low:
+    trigger: [Q, Q, Q]
+    action:
+      - type: move_group_state
+        state_name: ready_low
+        action: move
+  ready_high:
+    trigger: [T, T, T]
+    action:
+      - type: move_group_state
+        state_name: ready_high
+        action: move
+  custom_1:
+    trigger: none
+    action:
+      - type: move_group_state
+        state_name: custom_1
+        action: move
+  custom_2:
+    trigger: none
+    action:
+      - type: move_group_state
+        state_name: custom_2
+        action: move
+  remember_custom_1:
+    trigger: none
+    action:
+      - type: move_group_state
+        state_name: custom_1
+        action: remember
+  remember_custom_2:
+    trigger: none
+    action:
+      - type: move_group_state
+        state_name: custom_2
+        action: remember
+  recovery:
+    trigger: [SH, 3]
+    action:
+      - type: single_point_trajectory
+        topic: quince_arm/controller/command
+        joints:
+          joint4: 0
+          joint5: 0
+          joint6: -1.5707
+        frame_id: arm/base_link
+        execution_time: 2.5
+      - type: sleep
+        duration: 3.0
+  rotate_hand_right:
+    trigger: [OP, OP, OP]
+    action:
+      - type: single_point_trajectory
+        topic: quince_arm/controller/command
+        joints:
+          # +90 deg from current
+          joint6: 1.57075++
+        frame_id: arm/base_link
+        execution_time: 1.5
+      - type: sleep
+        duration: 2.5
+  rotate_hand_left:
+    trigger: [SH, SH, SH]
+    action:
+      - type: single_point_trajectory
+        topic: quince_arm/controller/command
+        joints:
+          # -90 deg from current
+          joint6: -1.57075++
+        frame_id: arm/base_link
+        execution_time: 1.5
+      - type: sleep
+        duration: 2.5
