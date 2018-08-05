@@ -20,6 +20,16 @@ The first thing you need to do is give each physical axes and buttons a name.
 You only need to do this for the ones that you are going to use, but it is
 recommended that you name all your axes and buttons.
 
+### Bundled Configurations
+
+The following controllers are supported by default, although you may change
+the name of the axes/buttons depending on your preference.
+
+- PS4 (Wired): `ps4_wired.yaml`
+- PS4 (Wireless): `ps4_wireless.yaml`
+- Elecom JC-U3412S: `elecom_small.yaml`
+- Elecom JC-U4113S: `elecom_large.yaml` (Coming soon)
+
 ### Normal Case
 
 Normally, you would use an axis as an axis and a button as a button:
