@@ -9,9 +9,10 @@ presets:
   switch_twist_mode:
     trigger: [[R1, R2, L1, L2], 1]
     action:
-      - type: set_shared
+      - type: shared_values
+        method: round_robin
         key: twist_mode
-        value: ['body', 'arm']
+        values: ['body', 'arm']
   super:
     # Dummy
     trigger: [C_U, C_U, C_D, C_D, C_L, C_R, C_L, C_R, X, O]
