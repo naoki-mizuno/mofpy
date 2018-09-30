@@ -1,3 +1,5 @@
+import rospy
+
 from .action import Action
 from ..shared import Shared
 
@@ -32,13 +34,16 @@ class SharedValues(Action):
     def execute(self, named_joy=None):
         # Note: Handles increment/decrement
         index = self.__next_index__()
-        self.__select__(index)
+        value = self.__select__(index)
+
+        rospy.loginfo('{0} : {1}'.format(self.__key, value))
 
     def __select__(self, index):
         Shared.add(self.__shared_index_key, index)
 
         value = self.__all_values[index]
         Shared.add(self.__key, value)
+        return value
 
     def __next_index__(self):
         curr_index = Shared.get(self.__shared_index_key)

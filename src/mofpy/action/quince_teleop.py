@@ -21,9 +21,6 @@ class QuinceTeleop(Action):
         self.__flipper_topic = self.get_required('flipper_topic')
 
     def execute(self, named_joy=None):
-        if Shared.get('twist_mode') != 'quince':
-            return
-
         pass
 
 

@@ -6,13 +6,13 @@ timeout:
   sequence: 0.2
 
 presets:
-  switch_twist_mode:
-    trigger: [[R1, R2, L1, L2], 1]
+  change_state:
+    trigger: [[LSP, RSP], 1]
     action:
       - type: shared_values
         method: round_robin
-        key: twist_mode
-        values: ['body', 'arm']
+        key: state
+        values: ['chassis', 'arm']
   super:
     # Dummy
     trigger: [C_U, C_U, C_D, C_D, C_L, C_R, C_L, C_R, X, O]

@@ -1,6 +1,7 @@
 presets:
   arm_twist:
-    trigger: any
+    trigger: always
+    enabled_states: ['arm']
     action:
       - type: arm_twist
         frame_id: hand
@@ -18,60 +19,70 @@ presets:
           Y: [R1, -L1]
   open_hand:
     trigger: O
+    enabled_states: ['arm']
     action:
       - type: publish_float64
         topic: quince_arm/hand_controller/command
         value: 0.2
   close_hand:
     trigger: X
+    enabled_states: ['arm']
     action:
       - type: publish_float64
         topic: quince_arm/hand_controller/command
         value: -1.8
   initial:
     trigger: [PS, PS, PS]
+    enabled_states: ['arm']
     action:
       - type: move_group_state
         state_name: initial
         action: move
   ready_low:
     trigger: [Q, Q, Q]
+    enabled_states: ['arm']
     action:
       - type: move_group_state
         state_name: ready_low
         action: move
   ready_high:
     trigger: [T, T, T]
+    enabled_states: ['arm']
     action:
       - type: move_group_state
         state_name: ready_high
         action: move
   custom_1:
     trigger: none
+    enabled_states: ['arm']
     action:
       - type: move_group_state
         state_name: custom_1
         action: move
   custom_2:
     trigger: none
+    enabled_states: ['arm']
     action:
       - type: move_group_state
         state_name: custom_2
         action: move
   remember_custom_1:
     trigger: none
+    enabled_states: ['arm']
     action:
       - type: move_group_state
         state_name: custom_1
         action: remember
   remember_custom_2:
     trigger: none
+    enabled_states: ['arm']
     action:
       - type: move_group_state
         state_name: custom_2
         action: remember
   recovery:
     trigger: [SH, 3]
+    enabled_states: ['arm']
     action:
       - type: single_point_trajectory
         topic: quince_arm/controller/command
@@ -85,6 +96,7 @@ presets:
         duration: 3.0
   rotate_hand_right:
     trigger: [OP, OP, OP]
+    enabled_states: ['arm']
     action:
       - type: single_point_trajectory
         topic: quince_arm/controller/command
@@ -97,6 +109,7 @@ presets:
         duration: 2.5
   rotate_hand_left:
     trigger: [SH, SH, SH]
+    enabled_states: ['arm']
     action:
       - type: single_point_trajectory
         topic: quince_arm/controller/command

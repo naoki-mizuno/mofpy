@@ -44,7 +44,7 @@ class EventManager:
         # Actual presets that were triggered by the sequence
         self.__triggered_presets = []
         # Presets that are triggered every time
-        self.__triggered_any = []
+        self.__triggered_always = []
 
         # Used to determine key down events
         self.__prev_named_buttons = dict()
@@ -64,8 +64,8 @@ class EventManager:
         :param sequence:
         :return:
         """
-        if sequence == 'any':
-            self.__triggered_any.append(preset_name)
+        if sequence == 'always':
+            self.__triggered_always.append(preset_name)
         elif isinstance(sequence, six.string_types):
             # Single press
             #   foo: 'X'
@@ -155,17 +155,21 @@ class EventManager:
                 self.__prev_named_buttons[name] = copy.deepcopy(curr)
         return key_up, key_down
 
-    def get_triggered(self):
+    def get_sequence_triggered(self):
+        """
+        Gets the presets that are triggered by the currently-input sequence
+
+        :return: names of the presets that are triggered
+        """
         if len(self.__triggered_presets) == 0:
-            # Only return the presets that are always triggered
             return []
         triggered = copy.deepcopy(self.__triggered_presets)
 
         self.__triggered_presets = []
         return triggered
 
-    def get_any_triggered(self):
-        return self.__triggered_any
+    def get_always_triggered(self):
+        return self.__triggered_always
 
     def __event_spinner__(self):
         while not rospy.is_shutdown():

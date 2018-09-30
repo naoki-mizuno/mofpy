@@ -24,3 +24,11 @@ class Shared:
     @staticmethod
     def get(key):
         return Shared.shared_values[key]
+
+    @staticmethod
+    def set(key, val):
+        Shared.add(key, val)
+
+    @staticmethod
+    def has(key):
+        return key in Shared.shared_values
