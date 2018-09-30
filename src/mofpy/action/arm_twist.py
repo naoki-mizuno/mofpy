@@ -23,9 +23,6 @@ class ArmTwist(Action):
                                              queue_size=1)
 
     def execute(self, named_joy=None):
-        if Shared.get('twist_mode') != 'arm':
-            return
-
         self.publish_cmd_delta(named_joy)
 
     def publish_cmd_delta(self, named_joy):
