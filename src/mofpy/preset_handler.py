@@ -27,8 +27,7 @@ class PresetHandler:
         self.__event_manager = EventManager(timeout_press, timeout_sequence)
         move_group_name = rospy.get_param('~move_group_name', None)
         connected = MoveGroupUtils.connect(move_group_name)
-        if not connected:
-            Shared.add('move_group_disabled', True)
+        Shared.add('move_group_disabled', not connected)
 
         self.__trigger_monitor = Thread(target=self.__trigger_spin__)
         self.__trigger_monitor.start()
