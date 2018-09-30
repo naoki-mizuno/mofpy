@@ -18,10 +18,6 @@ class ArmTwist(Action):
         self.__mapping = self.__mapping__()
         self.__published_zero = False
 
-        is_default = self.get('is_default_twist_mode', False)
-        if is_default:
-            Shared.add('twist_mode', 'arm')
-
         self.cmd_delta_pub = rospy.Publisher('cmd_delta',
                                              TwistStamped,
                                              queue_size=1)

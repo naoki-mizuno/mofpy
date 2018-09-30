@@ -16,7 +16,6 @@ presets:
           R: RSH
           P: RSV
           Y: [R1, -L1]
-        is_default_twist_mode: true
   open_hand:
     trigger: O
     action:
