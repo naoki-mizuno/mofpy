@@ -101,11 +101,11 @@ class PresetHandler:
                 rospy.logerr('Required key "type" not set')
                 continue
             action_type = action_definition['type']
-            cls = Action.actions[action_type]
             if action_type not in Action.actions:
                 msg = 'Action type {0} not implemented'.format(action_type)
                 rospy.logerr(msg)
             else:
+                cls = Action.actions[action_type]
                 actions.append(cls(action_definition))
 
         return trigger, actions
