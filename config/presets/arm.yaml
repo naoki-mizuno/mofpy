@@ -1,6 +1,6 @@
 presets:
   arm_twist:
-    trigger: any
+    trigger: always
     action:
       - type: arm_twist
         frame_id: hand

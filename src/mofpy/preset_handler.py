@@ -60,7 +60,7 @@ class PresetHandler:
 
     def __trigger_spin__(self):
         while not rospy.is_shutdown():
-            triggered_presets = self.__event_manager.get_triggered()
+            triggered_presets = self.__event_manager.get_sequence_triggered()
 
             # TODO: Remove this part! Only for debugging
             if len(triggered_presets) != 0:
@@ -78,14 +78,13 @@ class PresetHandler:
 
             # Presets that are always triggered
             self.__named_joy_lock.acquire(True)
-            for preset_name in self.__event_manager.get_any_triggered():
+            for preset_name in self.__event_manager.get_always_triggered():
                 if preset_name not in self.__presets:
                     rospy.logerr(preset_name + ' not found in presets')
                     return
                 for preset_action in self.__presets[preset_name]:
                     if self.__named_joy is not None:
                         preset_action.execute(self.__named_joy)
-            # Don't trigger the 'any' presets until a new message is received
             self.__named_joy = None
             self.__named_joy_lock.release()
 

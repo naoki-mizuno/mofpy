@@ -1,6 +1,6 @@
 presets:
   quince_teleop:
-    trigger: any
+    trigger: always
     action:
       - type: quince_teleop
         # Choose from: on_input, continuous
