@@ -2,9 +2,12 @@ from abc import *
 
 
 class Action(object):
-    # Make sure to define the NAME in the derived class!
+    # Note: Make sure to define the NAME in the derived class!
     NAME = ''
+    # Action names and their corresponding classes
     actions = {}
+    # Disabled actions due to import failure. module name => reason
+    disabled = {}
 
     def __init__(self, definition):
         """

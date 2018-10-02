@@ -1,9 +1,16 @@
+# Import only the base class. Automatically import the rest
 from .action import Action
-from .single_point_trajectory import SinglePointTrajectory
-from .sleep import Sleep
-from .move_group_state import MoveGroupState
-from .publish_float64 import PublishFloat64
-from .arm_twist import ArmTwist
-from .shared_values import SharedValues
-from .flipper_control import PubFlipperControl
-from .quince_teleop import QuinceTeleop
+
+import pkgutil
+
+__path__ = pkgutil.extend_path(__path__, __name__)
+for importer, modname, ispkg in pkgutil.walk_packages(path=__path__,
+                                                      prefix=__name__ + '.'):
+    try:
+        __import__(modname)
+    except ImportError as e:
+        # Silently fail here. Message will be printed by PresetHandler
+        Action.disabled[modname] = e.message
+
+del importer, modname, ispkg
+del pkgutil

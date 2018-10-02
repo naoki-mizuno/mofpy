@@ -1,6 +1,6 @@
 import rospy
 
-from .action import *
+from .action import Action
 from .event_manager import EventManager
 from .named_mapping import NamedMappings
 from .move_group_utils import MoveGroupUtils
@@ -51,6 +51,12 @@ class PresetHandler:
                 self.__enabled_states[preset_name] = [es]
             else:
                 self.__enabled_states[preset_name] = es
+
+        # Output error messages about failed import attempts
+        for module_name in Action.disabled.keys():
+            reason = Action.disabled[module_name]
+            msg = 'Failed to import {0} : {1}'.format(module_name, reason)
+            rospy.logerr(msg)
 
     def handle(self, msg):
         """
@@ -128,10 +134,8 @@ class PresetHandler:
                 rospy.logerr('Required key "type" not set')
                 continue
             action_type = action_definition['type']
-            if action_type not in Action.actions:
-                msg = 'Action type {0} not implemented'.format(action_type)
-                rospy.logerr(msg)
-            else:
+            # Note: Failed imports will be skipped here
+            if action_type in Action.actions:
                 cls = Action.actions[action_type]
                 actions.append(cls(action_definition))
 
