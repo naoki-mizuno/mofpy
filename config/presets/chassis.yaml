@@ -63,7 +63,7 @@ presets:
           rl: 1.570796
           rr: 1.570796
   flippers_0deg:
-    trigger: T
+    trigger: O
     enabled_states: ['chassis']
     action:
       - type: flipper_control
@@ -86,7 +86,7 @@ presets:
           rr: 0.785398
   flippers_shachihoko:
     # TODO: Check trigger
-    trigger: T
+    trigger: X
     enabled_states: ['chassis']
     action:
       - type: flipper_control
