@@ -4,11 +4,34 @@ presets:
     enabled_states: ['chassis']
     action:
       - type: quince_teleop
-        # Choose from: on_input, continuous
-        publish_mode: continuous
-        publish_rate: 100
         cmd_vel_topic: quince_vw
         flipper_topic: flipper_control
+        frame_id: quince/chassis/base_link
+        flipper:
+          step: 0.005
+          limits:
+            high: 3.1415
+            low: -3.1415
+        mapping:
+          sticks:
+            left:
+              vertical: LSV
+              horizontal: LSH
+            right:
+              vertical: RSV
+              horizontal: RSH
+          independent:
+            fl: R1
+            fr: R2
+            rl: L1
+            rr: L2
+          synchronized:
+            front:
+              raise: R1
+              lower: R2
+            rear:
+              raise: L1
+              lower: L2
   flip_front_direction:
     trigger: LSP
     enabled_states: ['chassis']
@@ -17,24 +40,43 @@ presets:
         method: round_robin
         key: front_direction
         values: ['normal', 'inverted']
-  change_control_mode:
+  cmd_vel_mode:
     trigger: RSP
     enabled_states: ['chassis']
     action:
       - type: shared_values
         method: round_robin
-        key: control_mode
+        key: cmd_vel_mode
         values: ['normal', 'beginner', 'tank']
-  increase_speed_multiplier:
+  increase_scale_translation:
+    trigger: C_U
+    enabled_states: ['chassis']
+    action:
+      - type: shared_values
+        method: bidirectional
+        direction: increment
+        key: scale_translation
+        values: [0.25, 0.5, 1.0]
+  decrease_scale_translation:
+    trigger: C_D
+    enabled_states: ['chassis']
+    action:
+      - type: shared_values
+        method: bidirectional
+        direction: decrement
+        decremental: true
+        key: scale_translation
+        values: [0.25, 0.5, 1.0]
+  increase_scale_rotation:
     trigger: C_R
     enabled_states: ['chassis']
     action:
       - type: shared_values
         method: bidirectional
         direction: increment
-        key: speed_multiplier
+        key: scale_rotation
         values: [0.25, 0.5, 1.0]
-  decrease_speed_multiplier:
+  decrease_scale_rotation:
     trigger: C_L
     enabled_states: ['chassis']
     action:
@@ -42,17 +84,17 @@ presets:
         method: bidirectional
         direction: decrement
         decremental: true
-        key: speed_multiplier
+        key: scale_rotation
         values: [0.25, 0.5, 1.0]
-  toggle_indep_flippers:
+  flipper_control_mode:
     trigger: Q
     enabled_states: ['chassis']
     action:
       - type: shared_values
-        key: indep_flippers
-        values: [false, true]
+        key: flipper_control_mode
+        values: [synchronized, independent]
   flippers_90deg:
-    trigger: [L1, L2, R1, R2]
+    trigger: [[L1, L2, R1, R2]]
     enabled_states: ['chassis']
     action:
       - type: flipper_control
