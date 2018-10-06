@@ -22,14 +22,14 @@ presets:
     enabled_states: ['arm']
     action:
       - type: publish_float64
-        topic: quince_arm/hand_controller/command
+        topic: doppel/hand_controller/command
         value: 0.2
   close_hand:
     trigger: X
     enabled_states: ['arm']
     action:
       - type: publish_float64
-        topic: quince_arm/hand_controller/command
+        topic: doppel/hand_controller/command
         value: -1.8
   initial:
     trigger: [PS, PS, PS]
@@ -85,7 +85,7 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: quince_arm/controller/command
+        topic: doppel/controller/command
         joints:
           joint4: 0
           joint5: 0
@@ -99,7 +99,7 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: quince_arm/controller/command
+        topic: doppel/controller/command
         joints:
           # +90 deg from current
           joint6: 1.57075++
@@ -112,7 +112,7 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: quince_arm/controller/command
+        topic: doppel/controller/command
         joints:
           # -90 deg from current
           joint6: -1.57075++
