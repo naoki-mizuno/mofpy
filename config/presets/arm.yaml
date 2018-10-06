@@ -4,7 +4,7 @@ presets:
     enabled_states: ['arm']
     action:
       - type: arm_twist
-        frame_id: hand
+        frame_id: arm/hand_camera
         # Don't publish twist if no change is commanded
         quiet_on_zero: true
         scale:
@@ -12,11 +12,11 @@ presets:
           rotation: 0.15
         mapping:
           x: LSV
-          y: -LSH
+          y: LSH
           z: [R2, -L2]
-          R: RSH
+          R: -RSH
           P: RSV
-          Y: [R1, -L1]
+          Y: [L1, -R1]
   open_hand:
     trigger: O
     enabled_states: ['arm']
