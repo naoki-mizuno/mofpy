@@ -15,10 +15,11 @@ class ArmTwist(Action):
         self.__scale_trn = self.get('scale/translation', 0.1)
         self.__scale_rot = self.get('scale/rotation', 0.01)
         self.__quiet_on_zero = self.get('quiet_on_zero', True)
+        self.__out_topic = self.get('out_topic', 'cmd_delta')
         self.__mapping = self.__mapping__()
         self.__published_zero = False
 
-        self.cmd_delta_pub = rospy.Publisher('cmd_delta',
+        self.cmd_delta_pub = rospy.Publisher(self.__out_topic,
                                              TwistStamped,
                                              queue_size=1)
 

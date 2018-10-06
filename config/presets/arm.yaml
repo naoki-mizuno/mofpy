@@ -5,6 +5,7 @@ presets:
     action:
       - type: arm_twist
         frame_id: arm/hand_camera
+        out_topic: doppel/cmd_delta
         # Don't publish twist if no change is commanded
         quiet_on_zero: true
         scale:
