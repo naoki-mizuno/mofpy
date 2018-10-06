@@ -4,8 +4,8 @@ presets:
     enabled_states: ['arm']
     action:
       - type: arm_twist
-        frame_id: arm/hand_camera
-        out_topic: doppel/cmd_delta
+        frame_id: $(arg ROBOT)/hand_camera
+        out_topic: $(arg ROBOT)/cmd_delta
         # Don't publish twist if no change is commanded
         quiet_on_zero: true
         scale:
@@ -23,14 +23,14 @@ presets:
     enabled_states: ['arm']
     action:
       - type: publish_float64
-        topic: doppel/hand_controller/command
+        topic: $(arg ROBOT)/hand_controller/command
         value: 0.2
   close_hand:
     trigger: X
     enabled_states: ['arm']
     action:
       - type: publish_float64
-        topic: doppel/hand_controller/command
+        topic: $(arg ROBOT)/hand_controller/command
         value: -1.8
   initial:
     trigger: [PS, PS, PS]
@@ -86,7 +86,7 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: doppel/controller/command
+        topic: $(arg ROBOT)/controller/command
         joints:
           joint4: 0
           joint5: 0
@@ -100,7 +100,7 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: doppel/controller/command
+        topic: $(arg ROBOT)/controller/command
         joints:
           # +90 deg from current
           joint6: 1.57075++
@@ -113,7 +113,7 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: doppel/controller/command
+        topic: $(arg ROBOT)/controller/command
         joints:
           # -90 deg from current
           joint6: -1.57075++
