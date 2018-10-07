@@ -21,7 +21,7 @@ class QuinceTeleop(Action):
         self.__cmd_vel_topic = self.get_required('cmd_vel_topic')
         self.__flipper_topic = self.get_required('flipper_topic')
         self.__mapping = self.__read_mappings__()
-        self.__frame_id = self.get('frame_id')
+        self.__frame_id = self.get('frame_id', 'base_link')
         self.__flipper_low = self.get('flipper/limits/low', -0.5)
         self.__flipper_high = self.get('flipper/limits/high', 0.5)
         self.__flipper_step = self.get('flipper/step', 0.005)
@@ -115,12 +115,12 @@ class QuinceTeleop(Action):
 
     def __read_mappings__(self):
         return {
-            'LSV': self.get('mapping/sticks/left/vertical'),
-            'LSH': self.get('mapping/sticks/left/horizontal'),
-            'RSV': self.get('mapping/sticks/right/vertical'),
-            'RSH': self.get('mapping/sticks/right/horizontal'),
-            'indep': self.get('mapping/independent'),
-            'sync': self.get('mapping/synchronized')
+            'LSV': self.get_required('mapping/sticks/left/vertical'),
+            'LSH': self.get_required('mapping/sticks/left/horizontal'),
+            'RSV': self.get_required('mapping/sticks/right/vertical'),
+            'RSH': self.get_required('mapping/sticks/right/horizontal'),
+            'indep': self.get_required('mapping/independent'),
+            'sync': self.get_required('mapping/synchronized')
         }
 
     @staticmethod

@@ -22,7 +22,13 @@ class Shared:
             Shared.lock.release()
 
     @staticmethod
-    def get(key):
+    def get_required(key):
+        return Shared.shared_values[key]
+
+    @staticmethod
+    def get(key, default_val=None):
+        if key not in Shared.shared_values:
+            return default_val
         return Shared.shared_values[key]
 
     @staticmethod

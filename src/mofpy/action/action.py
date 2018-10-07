@@ -42,7 +42,7 @@ class Action(object):
         Get the value in self.definition from a slash-separated key
         :param key_name: slash-separated key name
         :param default_val: value to be used if key is not found
-        :return: The value
+        :return: The value. If not found, returns None
         """
         definition = self.definition
 

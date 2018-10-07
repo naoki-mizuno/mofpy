@@ -1,66 +1,130 @@
-mapping:
-  # Left Stick Up/Down
-  x: a1
-  # Left Stick Left/Right
-  y: a0
-  # Axis 4 (R2) for plus, axis 3 (L2) for minus
-  # Active-low with button counterparts
-  z: [a4al7, a3al6]
-  # Axis 2 (Right Stick Left/Right) inverse
-  roll: -a2
-  # Axis 5 (Right Stick Up/Down)
-  pitch: a5
-  # Button 4 (R1) for plus (CCW), Button 5 (L1) for minus (CW)
-  yaw: [b4, b5]
-  # TODO: Support the following format
-  # z:
-  #   plus:
-  #     type: axis
-  #     idx: 4
-  #     active_low: 7
-  #     # active_low: true
-  #     # inverted: true
-  #   minus:
-  #     type: axis
-  #     idx: 3
-  #     active_low: true
-
-  presets:
-    # Center touch pad
-    initial:
-      event: triple_press
-      index: 13
-    # Square
-    ready_low:
-      event: triple_press
-      index: 0
+virtual:
+  axes:
+    # Left Stick Left/Right
+    LSH:
+      real:
+        type: axis
+        index: 0
+    # Left Stick Up/Down
+    LSV:
+      real:
+        type: axis
+        index: 1
+    # Right Stick Left/Right
+    RSH:
+      real:
+        type: axis
+        index: 2
+    # Right Stick Up/Down
+    RSV:
+      real:
+        type: axis
+        index: 5
+    L1:
+      real:
+        type: button
+        index: 4
+    R1:
+      real:
+        type: button
+        index: 5
+    L2:
+      real:
+        type: axis
+        index: 3
+      ps_shoulder_counterpart: 6
+    R2:
+      real:
+        type: axis
+        index: 4
+      ps_shoulder_counterpart: 7
+  buttons:
+    X:
+      real:
+        type: button
+        index: 1
+    O:
+      real:
+        type: button
+        index: 2
     # Triangle
-    ready_high:
-      event: triple_press
-      index: 3
-    # Option
-    rotate_hand_left:
-      event: triple_press
-      index: 9
-    rotate_hand_right:
-      event: long_press
-      duration: 1
-      index: 9
-    custom_1:
-      event: triple_press
-      index: 12
-    remember_custom_1:
-      event: long_press
-      duration: 3
-      index: 12
-    # Share button
-    recovery:
-      event: long_press
-      duration: 3
-      index: 8
-    open_hand:
-      event: button_up
-      index: 1
-    close_hand:
-      event: button_up
-      index: 2
+    T:
+      real:
+        type: button
+        index: 3
+    # Square
+    Q:
+      real:
+        type: button
+        index: 0
+    L1:
+      real:
+        type: button
+        index: 4
+    R1:
+      real:
+        type: button
+        index: 5
+    L2:
+      real:
+        type: button
+        index: 6
+    R2:
+      real:
+        type: button
+        index: 7
+    SH:
+      real:
+        type: button
+        index: 8
+    OP:
+      real:
+        type: button
+        index: 9
+    PS:
+      real:
+        type: button
+        index: 12
+    # Left Stick Press
+    LSP:
+      real:
+        type: button
+        index: 10
+    # Right Stick Press
+    RSP:
+      real:
+        type: button
+        index: 11
+    # Touch pad
+    PAD:
+      real:
+        type: button
+        index: 13
+    # Right cursor button
+    C_R:
+      real:
+        type: axis
+        index: 9
+      low_range: [-0.1, 0.0]
+      high_range: [-1.0, -0.1]
+    # Left cursor button
+    C_L:
+      real:
+        type: axis
+        index: 9
+      low_range: [0.0, 0.1]
+      high_range: [0.1, 1.0]
+    # Up cursor button
+    C_U:
+      real:
+        type: axis
+        index: 10
+      low_range: [0.0, 0.1]
+      high_range: [0.1, 1.0]
+    # Down cursor button
+    C_D:
+      real:
+        type: axis
+        index: 10
+      low_range: [-0.1, 0.0]
+      high_range: [-1.0, -0.1]
