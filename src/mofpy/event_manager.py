@@ -1,4 +1,5 @@
 import rospy
+from rospy.exceptions import ROSInterruptException
 
 from .joy_mapping import JoyMapping
 
@@ -173,7 +174,11 @@ class EventManager:
 
     def __event_spinner__(self):
         while not rospy.is_shutdown():
-            rospy.sleep(0.001)
+            try:
+                rospy.sleep(0.001)
+            except ROSInterruptException:
+                # Main thread probably wants us to shut down
+                return
 
             now = rospy.Time.now()
 

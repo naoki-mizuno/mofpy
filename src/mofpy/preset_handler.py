@@ -1,4 +1,5 @@
 import rospy
+from rospy.exceptions import ROSInterruptException
 
 from .action import Action
 from .event_manager import EventManager
@@ -103,7 +104,11 @@ class PresetHandler:
             self.__named_joy = None
             self.__named_joy_lock.release()
 
-            self.__check_rate.sleep()
+            try:
+                self.__check_rate.sleep()
+            except ROSInterruptException:
+                # Main thread wants us to shut down
+                return
 
     def __is_enabled_state__(self, preset_name):
         enabled_states = self.__enabled_states[preset_name]
