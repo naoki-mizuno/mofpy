@@ -4,8 +4,8 @@ presets:
     enabled_states: ['arm']
     action:
       - type: arm_twist
-        frame_id: arm/hand_camera
-        out_topic: doppel/cmd_delta
+        frame_id: hand_camera
+        out_topic: cmd_delta
         # Don't publish twist if no change is commanded
         quiet_on_zero: true
         scale:
@@ -23,14 +23,14 @@ presets:
     enabled_states: ['arm']
     action:
       - type: publish_float64
-        topic: doppel/hand_controller/command
+        topic: hand_controller/command
         value: 0.2
   close_hand:
     trigger: X
     enabled_states: ['arm']
     action:
       - type: publish_float64
-        topic: doppel/hand_controller/command
+        topic: hand_controller/command
         value: -1.8
   initial:
     trigger: [PS, PS, PS]
@@ -86,12 +86,12 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: doppel/controller/command
+        topic: controller/command
         joints:
           joint4: 0
           joint5: 0
           joint6: -1.5707
-        frame_id: arm/base_link
+        frame_id: base_link
         execution_time: 2.5
       - type: sleep
         duration: 3.0
@@ -100,11 +100,11 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: doppel/controller/command
+        topic: controller/command
         joints:
           # +90 deg from current
           joint6: 1.57075++
-        frame_id: arm/base_link
+        frame_id: base_link
         execution_time: 1.5
       - type: sleep
         duration: 2.5
@@ -113,11 +113,11 @@ presets:
     enabled_states: ['arm']
     action:
       - type: single_point_trajectory
-        topic: doppel/controller/command
+        topic: controller/command
         joints:
           # -90 deg from current
           joint6: -1.57075++
-        frame_id: arm/base_link
+        frame_id: base_link
         execution_time: 1.5
       - type: sleep
         duration: 2.5

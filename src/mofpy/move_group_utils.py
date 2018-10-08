@@ -11,18 +11,23 @@ class MoveGroupUtils:
         pass
 
     @staticmethod
-    def connect(move_group_name):
-        if move_group_name is None:
+    def connect(planning_group,
+                robot_description='robot_description',
+                action_namespace=''):
+        if planning_group is None:
             return False
 
-        MoveGroupUtils.robot = RobotCommander()
+        MoveGroupUtils.robot = RobotCommander(robot_description,
+                                              action_namespace)
 
         # Sometimes, MoveGroupCommander fails to initialize.
         # Try several times and then give up.
         attempt = 0
         while attempt <= 3:
             try:
-                MoveGroupUtils.group = MoveGroupCommander(move_group_name)
+                MoveGroupUtils.group = MoveGroupCommander(planning_group,
+                                                          robot_description,
+                                                          action_namespace)
                 return True
             except RuntimeError as e:
                 rospy.logwarn(e)
