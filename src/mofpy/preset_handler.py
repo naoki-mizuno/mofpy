@@ -28,9 +28,22 @@ class PresetHandler:
         timeout_press = rospy.get_param('~timeout/press', 0.05)
         timeout_sequence = rospy.get_param('~timeout/sequence', 0.20)
         self.__event_manager = EventManager(timeout_press, timeout_sequence)
-        move_group_name = rospy.get_param('~move_group_name', None)
-        connected = MoveGroupUtils.connect(move_group_name)
-        Shared.add('move_group_disabled', not connected)
+        # MoveIt! parameters
+        move_group_enabled = rospy.get_param('~move_group/enabled', True)
+
+        if move_group_enabled:
+            p = '~move_group/'
+            action_nampspace = rospy.get_param(p + 'action_namespace', None)
+            planning_group = rospy.get_param(p + 'planning_group', None)
+            robot_description = rospy.get_param(p + 'robot_description',
+                                                'robot_description')
+            connected = MoveGroupUtils.connect(planning_group,
+                                               robot_description,
+                                               action_nampspace)
+            move_group_enabled = move_group_enabled and connected
+        Shared.add('move_group_disabled', not move_group_enabled)
+        if move_group_enabled:
+            rospy.loginfo('Connected to MoveIt!')
 
         self.__trigger_monitor = Thread(target=self.__trigger_spin__)
         self.__trigger_monitor.start()
