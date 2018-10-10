@@ -1,11 +1,12 @@
 import rospy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from moveit_commander.move_group import MoveGroupCommander
 
-from .preset_task import PresetTask
+from .action import Action
+from ..move_group_utils import MoveGroupUtils
+from ..shared import Shared
 
 
-class SinglePointTrajectory(PresetTask):
+class SinglePointTrajectory(Action):
     """
     Publishes a JointTrajectory message to the specified topic
 
@@ -18,23 +19,30 @@ class SinglePointTrajectory(PresetTask):
     :type __joints: dict
     :type __group: MoveGroupCommander
     """
-    def __init__(self, definition, group):
+
+    NAME = 'single_point_trajectory'
+
+    def __init__(self, definition):
         super(SinglePointTrajectory, self).__init__(definition)
 
-        self.__topic_name = self.get_required_key('topic')
-        self.__time_from_start = self.get_required_key('execution_time')
-        self.__frame_id, found = self.get_key('frame_id', 'world')
-        if not found:
+        self.__topic_name = self.get_required('topic')
+        self.__time_from_start = self.get_required('execution_time')
+        self.__frame_id = self.get('frame_id', 'world')
+        if not self.has('frame_id'):
             rospy.logwarn('frame_id not found for single_point_trajectory.'
                           ' Using {0}'.format(self.__frame_id))
-        self.__joints = self.get_required_key('joints')
-        self.__group = group
+        self.__joints = self.get_required('joints')
+        self.__group = MoveGroupUtils.group
 
         self.__pub = rospy.Publisher(self.__topic_name,
                                      JointTrajectory,
                                      queue_size=1)
 
-    def execute(self):
+    def execute(self, named_joy=None):
+        if Shared.get('move_group_disabled'):
+            rospy.logerr('move_group disabled; not publishing trajectory')
+            return
+
         jt = JointTrajectory()
         jt.header.stamp = rospy.Time.now()
         jt.header.frame_id = self.__frame_id
@@ -62,3 +70,6 @@ class SinglePointTrajectory(PresetTask):
         jt.points.append(jtp)
 
         self.__pub.publish(jt)
+
+
+Action.register_preset(SinglePointTrajectory)

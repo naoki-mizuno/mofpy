@@ -1,47 +1,76 @@
 import rospy
-from moveit_commander import roscpp_initializer
-from moveit_commander.robot import RobotCommander
-from moveit_commander.move_group import MoveGroupCommander
+from rospy.exceptions import ROSInterruptException
 
-from .joy_event_callback import JoyEventCallback
-from .preset_action import *
+from .action import Action
+from .event_manager import EventManager
+from .named_mapping import NamedMappings
+from .move_group_utils import MoveGroupUtils
+from .shared import Shared
 
-import sys
+import six
+from threading import Thread, Lock
 
 
 class PresetHandler:
     """
-    :type __callbacks: list[JoyEventCallback]
-    :type __presets: dict[str, list[PresetTask]]
+    :type __joy_namer: NamedMappings
+    :type __presets: dict[str, list[Action]]
     """
-    def __init__(self):
+    def __init__(self, joy_names):
+        self.__joy_namer = joy_names
         self.__callbacks = []
+        self.__named_joy = None
+        self.__named_joy_lock = Lock()
 
-        roscpp_initializer.roscpp_initialize(sys.argv)
-        move_group_name = rospy.get_param('~presets/move_group_name')
-        self.__robot, self.__group = PresetHandler.__connect_to_move_group__(
-            move_group_name
-        )
+        self.__presets = dict()
+        self.__enabled_states = dict()
+        self.__check_rate = rospy.Rate(rospy.get_param('~check_rate', 100))
+        timeout_press = rospy.get_param('~timeout/press', 0.05)
+        timeout_sequence = rospy.get_param('~timeout/sequence', 0.20)
+        self.__event_manager = EventManager(timeout_press, timeout_sequence)
+        # MoveIt! parameters
+        move_group_enabled = rospy.get_param('~move_group/enabled', True)
 
-        # MoveGroupCommander has failed to initialize
-        if self.__group is None:
-            return
+        if move_group_enabled:
+            p = '~move_group/'
+            action_nampspace = rospy.get_param(p + 'action_namespace', None)
+            planning_group = rospy.get_param(p + 'planning_group', None)
+            robot_description = rospy.get_param(p + 'robot_description',
+                                                'robot_description')
+            connected = MoveGroupUtils.connect(planning_group,
+                                               robot_description,
+                                               action_nampspace)
+            move_group_enabled = move_group_enabled and connected
+        Shared.add('move_group_disabled', not move_group_enabled)
+        if move_group_enabled:
+            rospy.loginfo('Connected to MoveIt!')
 
-        self.__presets = PresetHandler.read_presets(
-            self.__robot, self.__group
-        )
+        self.__trigger_monitor = Thread(target=self.__trigger_spin__)
+        self.__trigger_monitor.start()
 
-    def register_callback(self, callback):
+    def bind_presets(self, definition):
         """
-        Registers a callback when a button event is triggered
-
-        :param callback:
-        :type callback: JoyEventCallback
+        Binds the triggers (input commands) to the preset to be executed
+        :param definition:
+        :return:
         """
-        self.__callbacks.append(callback)
+        for preset_name in definition.keys():
+            trigger, es, preset = PresetHandler.__read_preset__(preset_name)
+            self.__presets[preset_name] = preset
 
-    def remove_callback(self, callback):
-        self.__callbacks.remove(callback)
+            trigger = definition[preset_name]['trigger']
+            self.__event_manager.register(preset_name, trigger)
+
+            if isinstance(es, six.string_types):
+                self.__enabled_states[preset_name] = [es]
+            else:
+                self.__enabled_states[preset_name] = es
+
+        # Output error messages about failed import attempts
+        for module_name in Action.disabled.keys():
+            reason = Action.disabled[module_name]
+            msg = 'Failed to import {0} : {1}'.format(module_name, reason)
+            rospy.logerr(msg)
 
     def handle(self, msg):
         """
@@ -49,92 +78,83 @@ class PresetHandler:
         :param msg: Joy message
         :type msg: Joy
         """
-        for callback in self.__callbacks:
-            if callback.check(msg):
-                callback.call()
+        named_joy = self.__joy_namer.convert(msg)
+        self.__event_manager.append(named_joy['buttons'])
 
-    def execute(self, preset_name):
-        if preset_name not in self.__presets:
-            rospy.logerr('{0} not found in presets'.format(preset_name))
-            return
+        self.__named_joy_lock.acquire(True)
+        self.__named_joy = named_joy
+        self.__named_joy_lock.release()
 
-        for preset in self.__presets[preset_name]:
-            preset.execute()
+    def __trigger_spin__(self):
+        while not rospy.is_shutdown():
+            self.__named_joy_lock.acquire(True)
 
-    def register_mappings(self, mappings):
-        """
-        :type mappings: dict[str, dict[str, int | str]]
-        """
-        for preset_name in mappings.keys():
-            button = mappings[preset_name]['index']
-            event = mappings[preset_name]['event']
-            if event == JoyEventCallback.LONG_PRESS:
-                duration = mappings[preset_name]['duration']
-            else:
-                duration = None
+            triggered_presets = self.__event_manager.get_sequence_triggered()
 
-            cb = JoyEventCallback(button=button,
-                                  event=event,
-                                  callback=self.execute,
-                                  callback_args=(preset_name,),
-                                  press_duration=duration)
-            self.register_callback(cb)
+            # For debugging purposes
+            et = self.__enabled_triggered__(triggered_presets)
+            if len(et) != 0:
+                print(et)
 
-    @staticmethod
-    def __connect_to_move_group__(move_group_name):
-        robot = RobotCommander()
+            # Presets that are triggered by commands
+            for preset_name in triggered_presets:
+                if not self.__is_enabled_state__(preset_name):
+                    continue
 
-        # Sometimes, MoveGroupCommander fails to initialize when Rviz
-        # startup is too slow. Try several times and then give up.
-        attempt = 0
-        while attempt <= 3:
+                # Execute each action
+                for preset_action in self.__presets[preset_name]:
+                    preset_action.execute()
+
+            # Presets that are always triggered
+            for preset_name in self.__event_manager.get_always_triggered():
+                if not self.__is_enabled_state__(preset_name):
+                    continue
+
+                for preset_action in self.__presets[preset_name]:
+                    if self.__named_joy is not None:
+                        preset_action.execute(self.__named_joy)
+
+            self.__named_joy = None
+            self.__named_joy_lock.release()
+
             try:
-                group = MoveGroupCommander(move_group_name)
-                return robot, group
-            except RuntimeError as e:
-                rospy.logwarn(e)
-                rospy.logwarn('Trying again to initialize MoveGroupCommander')
-                attempt += 1
+                self.__check_rate.sleep()
+            except ROSInterruptException:
+                # Main thread wants us to shut down
+                return
 
-        msg = 'Could not connect to MoveGroupCommander. Disabling presets'
-        rospy.logwarn(msg)
-        return robot, None
+    def __is_enabled_state__(self, preset_name):
+        enabled_states = self.__enabled_states[preset_name]
 
-    @staticmethod
-    def read_presets(robot, group):
-        preset_definitions = rospy.get_param('~presets', dict())
-        preset_actions = dict()
-        for preset_name in preset_definitions.keys():
-            if preset_name == 'move_group_name':
-                continue
+        # Per-state enabling is turned off
+        if not Shared.has('state') or len(enabled_states) == 0:
+            return True
 
-            preset = PresetHandler.__read_preset__(preset_name,
-                                                   robot,
-                                                   group)
-            preset_actions[preset_name] = preset
-        return preset_actions
+        current_state = Shared.get('state')
+        return current_state in enabled_states
+
+    def __enabled_triggered__(self, triggered):
+        return list(filter(self.__is_enabled_state__, triggered))
 
     @staticmethod
-    def __read_preset__(preset_name, robot, group):
-        tasks = []
+    def __read_preset__(preset_name):
+        actions = []
         preset = rospy.get_param('~presets/{0}'.format(preset_name))
-        for task in preset:
-            # TODO: trajectory, command
-            if 'type' not in task:
+        trigger = preset['trigger']
+        if 'enabled_states' in preset:
+            enabled_states = preset['enabled_states']
+        else:
+            # Per-state enabling turned off
+            enabled_states = []
+
+        for action_definition in preset['action']:
+            if 'type' not in action_definition:
                 rospy.logerr('Required key "type" not set')
                 continue
-            task_type = task['type']
-            if task_type == 'single_point_trajectory':
-                tasks.append(SinglePointTrajectory(task, group))
-            elif task_type == 'sleep':
-                tasks.append(Sleep(task))
-            elif task_type == 'move_group_state':
-                tasks.append(MoveGroupState(task, robot, group))
-            elif task_type == 'remember_move_group_state':
-                tasks.append(RememberMoveGroupState(task, robot, group))
-            elif task_type == 'publish_float64':
-                tasks.append(PublishFloat64(task))
-            else:
-                msg = 'Task type {0} not implemented'.format(task_type)
-                rospy.logerr(msg)
-        return tasks
+            action_type = action_definition['type']
+            # Note: Failed imports will be skipped here
+            if action_type in Action.actions:
+                cls = Action.actions[action_type]
+                actions.append(cls(action_definition))
+
+        return trigger, enabled_states, actions

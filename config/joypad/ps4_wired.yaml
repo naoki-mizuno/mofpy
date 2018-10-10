@@ -1,0 +1,125 @@
+virtual:
+  axes:
+    # Left Stick Left/Right
+    LSH:
+      real:
+        type: axis
+        index: 0
+    # Left Stick Up/Down
+    LSV:
+      real:
+        type: axis
+        index: 1
+    # Right Stick Left/Right
+    RSH:
+      real:
+        type: axis
+        index: 3
+    # Right Stick Up/Down
+    RSV:
+      real:
+        type: axis
+        index: 4
+    L1:
+      real:
+        type: button
+        index: 4
+    R1:
+      real:
+        type: button
+        index: 5
+    L2:
+      real:
+        type: axis
+        index: 2
+      ps_shoulder_counterpart: 6
+    R2:
+      real:
+        type: axis
+        index: 5
+      ps_shoulder_counterpart: 7
+  buttons:
+    X:
+      real:
+        type: button
+        index: 0
+    O:
+      real:
+        type: button
+        index: 1
+    # Triangle
+    T:
+      real:
+        type: button
+        index: 2
+    # Square
+    Q:
+      real:
+        type: button
+        index: 3
+    L1:
+      real:
+        type: button
+        index: 4
+    R1:
+      real:
+        type: button
+        index: 5
+    L2:
+      real:
+        type: button
+        index: 6
+    R2:
+      real:
+        type: button
+        index: 7
+    SH:
+      real:
+        type: button
+        index: 8
+    OP:
+      real:
+        type: button
+        index: 9
+    PS:
+      real:
+        type: button
+        index: 10
+    # Left Stick Press
+    LSP:
+      real:
+        type: button
+        index: 11
+    # Right Stick Press
+    RSP:
+      real:
+        type: button
+        index: 12
+    # Right cursor button
+    C_R:
+      real:
+        type: axis
+        index: 6
+      low_range: [-0.1, 0.0]
+      high_range: [-1.0, -0.1]
+    # Left cursor button
+    C_L:
+      real:
+        type: axis
+        index: 6
+      low_range: [0.0, 0.1]
+      high_range: [0.1, 1.0]
+    # Up cursor button
+    C_U:
+      real:
+        type: axis
+        index: 7
+      low_range: [0.0, 0.1]
+      high_range: [0.1, 1.0]
+    # Down cursor button
+    C_D:
+      real:
+        type: axis
+        index: 7
+      low_range: [-0.1, 0.0]
+      high_range: [-1.0, -0.1]
