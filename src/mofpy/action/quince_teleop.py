@@ -111,6 +111,11 @@ class QuinceTeleop(Action):
         if dfl == dfr == drl == drr == 0:
             return
 
+        # When inverted, fl -> rr, fr -> rl
+        if Shared.get('front_direction') == 'inverted':
+            dfl, drr = drr, dfl
+            dfr, drl = drl, dfr
+
         msg = Shared.get('__flipper_command__')
         msg.fl += dfl * self.__flipper_step
         msg.fr += dfr * self.__flipper_step
