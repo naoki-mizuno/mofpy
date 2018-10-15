@@ -23,13 +23,19 @@ class SharedValues(Action):
         # Selection: round-robin or bidirectional
         selection = self.get('selection', 'round_robin')
         self.__is_bidirectional = selection == 'bidirectional'
+        if self.__is_bidirectional:
+            self.__wrap = self.get('wrap', False)
+        else:
+            # Don't want to disable wrapping in round_robin
+            self.__wrap = True
 
         # Push of a button increments/decrements the index
         direction = self.get('direction', 'inc').lower()
         self.__is_increment = direction.startswith('inc') or direction == '+'
 
-        # Automatically select the first value
-        self.__select__(0)
+        # Index to initially select
+        initial_index = self.get('initial', 0)
+        self.__select__(initial_index)
 
     def execute(self, named_joy=None):
         # Note: Handles increment/decrement
@@ -51,6 +57,9 @@ class SharedValues(Action):
             next_index = curr_index + 1
         else:
             next_index = curr_index - 1
+
+        if not self.__wrap:
+            next_index = min(len(self.__all_values) - 1, max(0, next_index))
 
         next_index = next_index % len(self.__all_values)
         self.__select__(next_index)
