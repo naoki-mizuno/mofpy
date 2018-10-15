@@ -38,7 +38,7 @@ class QuinceTeleop(Action):
 
     def execute(self, named_joy=None):
         self.pub_cmd_vel(named_joy['axes'])
-        self.pub_flipper(named_joy['axes'])
+        self.pub_flipper(named_joy['buttons'])
 
     def pub_cmd_vel(self, named_axes):
         mode = Shared.get('cmd_vel_mode')
@@ -73,15 +73,15 @@ class QuinceTeleop(Action):
         twist_stamped.twist.angular.z = w
         self.__pub_cmd_vel.publish(twist_stamped)
 
-    def pub_flipper(self, named_axes):
+    def pub_flipper(self, buttons):
         mode = Shared.get('flipper_control_mode')
         # Variables front, rear, fl, fr, rl, rr are numbers in range [-1, 1]
         if mode == 'synchronized':
             s = self.__mapping['sync']
-            f_raise = named_axes[s['front']['raise']].value
-            f_lower = named_axes[s['front']['lower']].value
-            r_raise = named_axes[s['rear']['raise']].value
-            r_lower = named_axes[s['rear']['lower']].value
+            f_raise = buttons[s['front']['raise']].value
+            f_lower = buttons[s['front']['lower']].value
+            r_raise = buttons[s['rear']['raise']].value
+            r_lower = buttons[s['rear']['lower']].value
 
             front = f_raise - f_lower
             rear = r_raise - r_lower
@@ -92,10 +92,22 @@ class QuinceTeleop(Action):
             drr = rear
 
         else:  # mode == 'independent'
-            dfl = named_axes[self.__mapping['indep']['fl']].value
-            dfr = named_axes[self.__mapping['indep']['fr']].value
-            drl = named_axes[self.__mapping['indep']['rl']].value
-            drr = named_axes[self.__mapping['indep']['rr']].value
+            is_raise = buttons[self.__mapping['indep']['raise']].value
+            is_lower = buttons[self.__mapping['indep']['lower']].value
+            if is_raise:
+                direction = 1
+            elif is_lower:
+                direction = -1
+            else:
+                direction = 0
+            dfl = 1 if buttons[self.__mapping['indep']['fl']].value else 0
+            dfl = dfl * direction
+            dfr = 1 if buttons[self.__mapping['indep']['fr']].value else 0
+            dfr = dfr * direction
+            drl = 1 if buttons[self.__mapping['indep']['rl']].value else 0
+            drl = drl * direction
+            drr = 1 if buttons[self.__mapping['indep']['rr']].value else 0
+            drr = drr * direction
 
         # Quiet input
         if dfl == dfr == drl == drr == 0:

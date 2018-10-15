@@ -21,10 +21,12 @@ presets:
               vertical: RSV
               horizontal: RSH
           independent:
-            fl: R1
-            fr: R2
-            rl: L1
-            rr: L2
+            raise: C_U
+            lower: C_D
+            fl: L1
+            fr: R1
+            rl: L2
+            rr: R2
           synchronized:
             front:
               raise: R1
