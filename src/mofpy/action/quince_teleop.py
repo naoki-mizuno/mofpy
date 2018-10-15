@@ -1,5 +1,5 @@
 import rospy
-from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import Twist
 from flipper_msgs.msg import flipper_control
 
 from .action import Action
@@ -30,7 +30,7 @@ class QuinceTeleop(Action):
             Shared.add('__flipper_command__', flipper_control())
 
         self.__pub_cmd_vel = rospy.Publisher(self.__cmd_vel_topic,
-                                             TwistStamped,
+                                             Twist,
                                              queue_size=1)
         self.__pub_flipper = rospy.Publisher(self.__flipper_topic,
                                              flipper_control,
@@ -66,12 +66,10 @@ class QuinceTeleop(Action):
         if Shared.get('front_direction') == 'inverted':
             v *= -1
 
-        twist_stamped = TwistStamped()
-        twist_stamped.header.stamp = rospy.Time.now()
-        twist_stamped.header.frame_id = self.__frame_id
-        twist_stamped.twist.linear.x = v
-        twist_stamped.twist.angular.z = w
-        self.__pub_cmd_vel.publish(twist_stamped)
+        cmd_vel = Twist()
+        cmd_vel.linear.x = v
+        cmd_vel.angular.z = w
+        self.__pub_cmd_vel.publish(cmd_vel)
 
     def pub_flipper(self, buttons):
         mode = Shared.get('flipper_control_mode')
