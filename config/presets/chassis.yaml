@@ -50,35 +50,17 @@ presets:
         method: round_robin
         key: cmd_vel_mode
         values: ['normal', 'beginner', 'tank']
-  increase_scale_translation:
-    trigger: C_U
-    enabled_states: ['chassis']
-    action:
-      - type: shared_values
-        method: bidirectional
-        direction: increment
-        key: scale_translation
-        values: [0.25, 0.5, 1.0]
-  decrease_scale_translation:
-    trigger: C_D
-    enabled_states: ['chassis']
-    action:
-      - type: shared_values
-        method: bidirectional
-        direction: decrement
-        decremental: true
-        key: scale_translation
-        values: [0.25, 0.5, 1.0]
-  increase_scale_rotation:
+  increase_scale:
     trigger: C_R
     enabled_states: ['chassis']
     action:
       - type: shared_values
         method: bidirectional
         direction: increment
-        key: scale_rotation
+        key: scale
+        initial: 2
         values: [0.25, 0.5, 1.0]
-  decrease_scale_rotation:
+  decrease_scale:
     trigger: C_L
     enabled_states: ['chassis']
     action:
@@ -86,7 +68,8 @@ presets:
         method: bidirectional
         direction: decrement
         decremental: true
-        key: scale_rotation
+        key: scale
+        initial: 2
         values: [0.25, 0.5, 1.0]
   flipper_control_mode:
     trigger: Q

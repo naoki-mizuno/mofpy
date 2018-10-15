@@ -59,8 +59,8 @@ class QuinceTeleop(Action):
             v, w = lsv, -rsh
 
         # Apply scaling
-        v *= float(Shared.get('scale_translation'))
-        w *= float(Shared.get('scale_rotation'))
+        v *= float(Shared.get('scale'))
+        w *= float(Shared.get('scale'))
 
         # Front-side-back
         if Shared.get('front_direction') == 'inverted':
