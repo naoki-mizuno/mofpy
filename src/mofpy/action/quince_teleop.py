@@ -50,13 +50,13 @@ class QuinceTeleop(Action):
         if mode == 'beginner':
             # Left vertical: velocity in X, left horizontal: ang vel in yaw
             # Note: Left is 1.0 and right is -1.0 in horizontal
-            v, w = lsv, -lsh
+            v, w = lsv, lsh
         elif mode == 'tank':
             v = float(lsv + rsv) / 2
             w = float(lsv - rsv) / 2
         else:  # mode == 'normal'
             # Left vertical: velocity in X, right horizontal: ang vel in yaw
-            v, w = lsv, -rsh
+            v, w = lsv, rsh
 
         # Apply scaling
         v *= float(Shared.get('scale'))
