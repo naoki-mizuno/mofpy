@@ -6,13 +6,20 @@ timeout:
   sequence: 0.2
 
 presets:
-  change_state:
-    trigger: [[LSP, RSP], 1]
+presets:
+  switch_state_to_chassis:
+    trigger: [OP, OP]
     action:
       - type: shared_values
-        method: round_robin
         key: state
-        values: ['chassis', 'arm']
+        initial: 0
+        value: 'chassis'
+  switch_state_to_arm:
+    trigger: [SH, SH]
+    action:
+      - type: shared_values
+        key: state
+        value: 'arm'
   super:
     # Dummy
     trigger: [C_U, C_U, C_D, C_D, C_L, C_R, C_L, C_R, X, O]

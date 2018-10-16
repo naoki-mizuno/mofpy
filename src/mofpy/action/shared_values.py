@@ -17,8 +17,11 @@ class SharedValues(Action):
         # All possible values
         self.__values_key = self.__key + '_values'
 
-        # TODO: In bidirectional, allow specifying values in only one action
-        self.__all_values = self.get_required('values')
+        if self.has('value'):
+            self.__all_values = [self.get('value')]
+        else:
+            # TODO: In bidirectional, specify values in only one action
+            self.__all_values = self.get_required('values')
 
         # Selection: round-robin or bidirectional
         selection = self.get('selection', 'round_robin')
@@ -33,9 +36,10 @@ class SharedValues(Action):
         direction = self.get('direction', 'inc').lower()
         self.__is_increment = direction.startswith('inc') or direction == '+'
 
-        # Index to initially select
-        initial_index = self.get('initial', 0)
-        self.__select__(initial_index)
+        if len(self.__all_values) > 1 or self.has('initial'):
+            # Index to initially select
+            initial_index = self.get('initial', 0)
+            self.__select__(initial_index)
 
     def execute(self, named_joy=None):
         # Note: Handles increment/decrement
