@@ -10,6 +10,10 @@
 !nodes/
 !src/
 !src/**/
+!docs/
+!docs/*
+!misc/
+!misc/logo.png
 !config/
 !config/**/
 !launch/
