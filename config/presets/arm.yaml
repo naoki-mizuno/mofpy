@@ -22,16 +22,22 @@ presets:
     trigger: O
     enabled_states: ['arm']
     action:
-      - type: publish_float64
-        topic: hand_controller/command
-        value: 0.2
+      - type: publish
+        topic:
+          name: hand_controller/command
+          type: std_msgs/Float64
+        values:
+          data: 0.2
   close_hand:
     trigger: X
     enabled_states: ['arm']
     action:
-      - type: publish_float64
-        topic: hand_controller/command
-        value: -1.8
+      - type: publish
+        topic:
+          name: hand_controller/command
+          type: std_msgs/Float64
+        values:
+          data: -1.8
   initial:
     trigger: [PS, PS, PS]
     enabled_states: ['arm']

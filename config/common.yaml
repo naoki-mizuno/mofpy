@@ -24,6 +24,26 @@ presets:
     # Dummy
     trigger: [C_U, C_U, C_D, C_D, C_L, C_R, C_L, C_R, X, O]
     action:
-      - type: publish_float64
-        topic: foo
-        value: 42
+      - type: publish
+        topic:
+          name: foo
+          type: std_msgs/String
+        values:
+          data: 'You found the secret command!'
+  sample_twist:
+    # Publish twist with a fixed value
+    trigger: [Q, T, O, X]
+    action:
+      - type: publish
+        topic:
+          name: bar
+          type: geometry_msgs/TwistStamped
+        values:
+          header:
+            stamp: now
+            frame_id: base_link
+          twist:
+            linear:
+              x: 1
+            angular:
+              z: 0.2
