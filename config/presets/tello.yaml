@@ -1,0 +1,33 @@
+presets:
+  cmd_vel:
+    trigger: always
+    action:
+      - type: twist_6dof
+        not_stamped: true
+        out_topic: tello/cmd_vel
+        # Don't publish twist if no change is commanded
+        quiet_on_zero: true
+        scale:
+          translation: 1
+          rotation: 1
+        mapping:
+          x: RSV
+          y: RSH
+          z: LSV
+          Y: LSH
+  takeoff:
+    trigger: T
+    action:
+      - type: publish
+        topic:
+          name: tello/takeoff
+          type: std_msgs/Empty
+        values: {}
+  land:
+    trigger: X
+    action:
+      - type: publish
+        topic:
+          name: tello/land
+          type: std_msgs/Empty
+        values: {}
