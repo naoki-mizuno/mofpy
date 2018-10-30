@@ -1,3 +1,11 @@
+# Note: Comment out to disable move_group-related presets
+move_group:
+  enabled: true
+  planning_group: arm
+  robot_description: robot_description
+  action_namespace: /
+
+
 presets:
   twist_6dof:
     trigger: always
