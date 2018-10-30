@@ -5,15 +5,15 @@ from .action import Action
 from ..shared import Shared
 
 
-class PublishCmdVel(Action):
+class Twist2DOF(Action):
     """
     :type __out_topic: str
     """
 
-    NAME = 'publish_cmd_vel'
+    NAME = 'twist_2dof'
 
     def __init__(self, definition):
-        super(PublishCmdVel, self).__init__(definition)
+        super(Twist2DOF, self).__init__(definition)
         Action.actions[self.__class__.NAME] = self.__class__
 
         self.__out_topic = self.get('out_topic', 'cmd_vel')
@@ -57,4 +57,4 @@ class PublishCmdVel(Action):
         self.__pub_cmd_vel.publish(twist_stamped)
 
 
-Action.register_preset(PublishCmdVel)
+Action.register_preset(Twist2DOF)

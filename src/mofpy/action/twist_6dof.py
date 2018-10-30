@@ -2,42 +2,38 @@ import rospy
 from geometry_msgs.msg import TwistStamped
 
 from .action import Action
-from ..shared import Shared
 
 
-class ArmTwist(Action):
-    NAME = 'arm_twist'
+class Twist6DOF(Action):
+    NAME = 'twist_6dof'
 
     def __init__(self, definition):
-        super(ArmTwist, self).__init__(definition)
+        super(Twist6DOF, self).__init__(definition)
 
-        self.__frame_id = self.get('frame_id', 'world')
+        self.__frame_id = self.get('frame_id', 'base_link')
         self.__scale_trn = self.get('scale/translation', 0.1)
         self.__scale_rot = self.get('scale/rotation', 0.01)
         self.__quiet_on_zero = self.get('quiet_on_zero', True)
-        self.__out_topic = self.get('out_topic', 'cmd_delta')
+        self.__out_topic = self.get('out_topic', 'cmd_vel')
         self.__mapping = self.__mapping__()
         self.__published_zero = False
 
-        self.cmd_delta_pub = rospy.Publisher(self.__out_topic,
-                                             TwistStamped,
-                                             queue_size=1)
+        self.__pub = rospy.Publisher(self.__out_topic,
+                                     TwistStamped,
+                                     queue_size=1)
 
     def execute(self, named_joy=None):
-        self.publish_cmd_delta(named_joy)
-
-    def publish_cmd_delta(self, named_joy):
         twist, is_quiet = self.__get_twist__(named_joy['axes'])
 
         if self.__quiet_on_zero:
             if is_quiet:
                 # Publish the all-zero message just once
                 if not self.__published_zero:
-                    self.cmd_delta_pub.publish(twist)
+                    self.__pub.publish(twist)
                     self.__published_zero = True
                 return
 
-        self.cmd_delta_pub.publish(twist)
+        self.__pub.publish(twist)
         self.__published_zero = False
 
     def __mapping__(self):
@@ -98,4 +94,4 @@ class ArmTwist(Action):
         return val
 
 
-Action.register_preset(ArmTwist)
+Action.register_preset(Twist6DOF)
