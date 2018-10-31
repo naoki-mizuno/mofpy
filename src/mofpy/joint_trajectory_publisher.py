@@ -31,7 +31,10 @@ class JointTrajectoryPublisher:
         jt.joint_names = []
 
         jtp = JointTrajectoryPoint()
-        jtp.time_from_start = rospy.Duration.from_sec(time_from_start)
+        if type(time_from_start) is int or type(time_from_start) is float:
+            jtp.time_from_start = rospy.Duration.from_sec(time_from_start)
+        else:
+            jtp.time_from_start = time_from_start
 
         for name in current_vals.keys():
             jt.joint_names.append(name)
