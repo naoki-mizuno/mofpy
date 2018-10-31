@@ -40,8 +40,8 @@ class Twist2DOF(Action):
         elif mode == 'tank':
             left = named_axes[self.get_required('tank/left')].value
             right = named_axes[self.get_required('tank/right')].value
-            v = float(left + right) / 2
-            w = float(left - right) / 2
+            v = float(right + left) / 2
+            w = float(right - left) / 2
         else:  # mode == 'normal'
             # Left vertical: velocity in X, right horizontal: ang vel in yaw
             v = named_axes[self.get_required('normal/v')].value
