@@ -4,7 +4,6 @@ timeout:
   sequence: 0.2
 
 presets:
-presets:
   switch_state_to_chassis:
     trigger: [OP, OP]
     action:
@@ -18,6 +17,12 @@ presets:
       - type: shared_values
         key: state
         value: 'arm'
+  switch_state_to_arm_fk:
+    trigger: [[OP, SH], [OP, SH]]
+    action:
+      - type: shared_values
+        key: state
+        value: 'arm-fk'
   super:
     # Dummy
     trigger: [C_U, C_U, C_D, C_D, C_L, C_R, C_L, C_R, X, O]

@@ -1,0 +1,28 @@
+presets:
+  arm_fk:
+    trigger: always
+    enabled_states: ['arm-fk']
+    action:
+      - type: joint_indiv_trajectory
+        topic: controller/command
+        frame_id: base_link
+        trajectory_duration: 0.2
+        angular_speed: 0.05
+        stale_timeout: 3
+        control_axis: LSV
+        enable_button:
+          joint1: L2
+          joint2: R2
+          joint3: R1
+          joint4: T
+          joint5: X
+          joint6: Q
+      - type: joint_indiv_position
+        joint_states: joint_states
+        step_angle: 0.01
+        stale_timeout: 3
+        control_axis: LSV
+        joints:
+          grasp:
+            enable_button: O
+            topic: hand_controller/command

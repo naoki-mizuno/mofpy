@@ -7,6 +7,7 @@
   <node pkg="mofpy" type="mofpy_node.py" name="mofpy" output="screen" >
     <rosparam command="load" file="$(find mofpy)/config/common.yaml" />
     <rosparam command="load" file="$(find mofpy)/config/presets/arm.yaml" />
+    <rosparam command="load" file="$(find mofpy)/config/presets/arm_fk.yaml" />
     <rosparam command="load" file="$(find mofpy)/config/presets/chassis.yaml" />
     <rosparam command="load" file="$(find mofpy)/config/joypad/$(arg joypad_type).yaml" />
   </node>
