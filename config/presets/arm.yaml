@@ -1,9 +1,17 @@
+# Note: Comment out to disable move_group-related presets
+move_group:
+  enabled: true
+  planning_group: arm
+  robot_description: robot_description
+  action_namespace: /
+
+
 presets:
-  arm_twist:
+  twist_6dof:
     trigger: always
     enabled_states: ['arm']
     action:
-      - type: arm_twist
+      - type: twist_6dof
         frame_id: hand_camera
         out_topic: cmd_delta
         # Don't publish twist if no change is commanded

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="joy_dev" default="/dev/input/js0" />
+  <!-- Choose from: ps4_wired, ps4_wireless, elecom_small -->
+  <arg name="joypad_type" default="ps4_wired" />
+
+  <node pkg="mofpy" type="mofpy_node.py" name="mofpy" output="screen" >
+    <rosparam command="load" file="$(find mofpy)/config/common.yaml" />
+    <rosparam command="load" file="$(find mofpy)/config/presets/tello.yaml" />
+    <rosparam command="load" file="$(find mofpy)/config/joypad/$(arg joypad_type).yaml" />
+  </node>
+
+  <node pkg="joy" type="joy_node" name="joy" >
+    <param name="dev" value="$(arg joy_dev)" />
+    <param name="deadzone" value="0" />
+    <param name="autorepeat_rate" value="100" />
+  </node>
+</launch>

@@ -1,6 +1,4 @@
 rate: 50
-# Note: Comment out to disable move_group-related presets
-move_group_name: arm
 timeout:
   press: 0.1
   sequence: 0.2
