@@ -1,8 +1,7 @@
 import rospy
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 from .action import Action
-from ..move_group_utils import MoveGroupUtils
+from ..joint_trajectory_publisher import JointTrajectoryPublisher
 from ..shared import Shared
 
 
@@ -17,7 +16,6 @@ class SinglePointTrajectory(Action):
     :type __time_from_start: float
     :type __frame_id: str
     :type __joints: dict
-    :type __group: MoveGroupCommander
     """
 
     NAME = 'single_point_trajectory'
@@ -28,48 +26,28 @@ class SinglePointTrajectory(Action):
         self.__topic_name = self.get_required('topic')
         self.__time_from_start = self.get_required('execution_time')
         self.__frame_id = self.get('frame_id', 'world')
-        if not self.has('frame_id'):
-            rospy.logwarn('frame_id not found for single_point_trajectory.'
-                          ' Using {0}'.format(self.__frame_id))
         self.__joints = self.get_required('joints')
-        self.__group = MoveGroupUtils.group
 
-        self.__pub = rospy.Publisher(self.__topic_name,
-                                     JointTrajectory,
-                                     queue_size=1)
+        self.__jtpub = JointTrajectoryPublisher(self.__topic_name)
 
     def execute(self, named_joy=None):
         if Shared.get('move_group_disabled'):
             rospy.logerr('move_group disabled; not publishing trajectory')
             return
 
-        jt = JointTrajectory()
-        jt.header.stamp = rospy.Time.now()
-        jt.header.frame_id = self.__frame_id
-        jt.joint_names = self.__group.get_active_joints()
-
-        jtp = JointTrajectoryPoint()
-        jtp.time_from_start = rospy.Duration.from_sec(self.__time_from_start)
-        jtp.positions = self.__group.get_current_joint_values()
-        if len(jtp.positions) == 0:
-            rospy.logerr('Joint states not obtained. Are you sure'
-                         ' /joint_states topic is published?')
-            return
-
-        # Only change the value of joints specified
-        for joint_name in self.__joints.keys():
-            idx = jt.joint_names.index(joint_name)
-            ang = self.__joints[joint_name]
-            if type(ang) is float or type(ang) is int:
-                jtp.positions[idx] = ang
+        joints = self.__jtpub.get_current_joint_values()
+        for name in self.__joints.keys():
+            ang = self.__joints[name]
+            if type(ang) is int or type(ang) is float:
+                joints[name] = ang
             elif ang.endswith('++'):
-                jtp.positions[idx] += float(ang[:-2])
+                joints[name] += float(ang[:-2])
+            elif ang.endswith('--'):
+                joints[name] -= float(ang[:-2])
             else:
-                raise ValueError("String {0} doesn't end with ++".format(ang))
+                raise ValueError("Couldn't understand: {0}".format(ang))
 
-        jt.points.append(jtp)
-
-        self.__pub.publish(jt)
+        self.__jtpub.publish(joints, self.__frame_id, self.__time_from_start)
 
 
 Action.register_preset(SinglePointTrajectory)
