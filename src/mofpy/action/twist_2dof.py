@@ -36,7 +36,7 @@ class Twist2DOF(Action):
             # Left vertical: velocity in X, left horizontal: ang vel in yaw
             # Note: Left is 1.0 and right is -1.0 in horizontal
             v = named_axes[self.get_required('beginner/v')].value
-            w = -named_axes[self.get_required('beginner/w')].value
+            w = named_axes[self.get_required('beginner/w')].value
         elif mode == 'tank':
             left = named_axes[self.get_required('tank/left')].value
             right = named_axes[self.get_required('tank/right')].value
@@ -45,7 +45,7 @@ class Twist2DOF(Action):
         else:  # mode == 'normal'
             # Left vertical: velocity in X, right horizontal: ang vel in yaw
             v = named_axes[self.get_required('normal/v')].value
-            w = -named_axes[self.get_required('normal/w')].value
+            w = named_axes[self.get_required('normal/w')].value
 
         # Apply scaling
         v *= float(Shared.get('scale_translation', self.__scale_translation))
