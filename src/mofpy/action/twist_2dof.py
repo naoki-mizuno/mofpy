@@ -18,11 +18,11 @@ class Twist2DOF(Action):
 
         self.__out_topic = self.get('out_topic', 'cmd_vel')
         self.__frame_id = self.get('frame_id', 'base_link')
-        self.__not_stamped = self.get('not_stamped', False)
+        self.__stamped = self.get('stamped', False)
         self.__scale_translation = self.get('scale/translation', 1)
         self.__scale_rotation = self.get('scale/rotation', 1)
 
-        cls = Twist if self.__not_stamped else TwistStamped
+        cls = TwistStamped if self.__stamped else Twist
         self.__pub_cmd_vel = rospy.Publisher(self.__out_topic,
                                              cls,
                                              queue_size=1)
@@ -55,7 +55,7 @@ class Twist2DOF(Action):
         twist.linear.x = v
         twist.angular.z = w
 
-        if self.__not_stamped:
+        if self.__stamped:
             msg = twist
         else:
             msg = TwistStamped()
