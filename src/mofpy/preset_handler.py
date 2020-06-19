@@ -4,7 +4,6 @@ from rospy.exceptions import ROSInterruptException
 from .action import Action
 from .event_manager import EventManager
 from .named_mapping import NamedMappings
-from .move_group_utils import MoveGroupUtils
 from .shared import Shared
 
 import six
@@ -29,7 +28,11 @@ class PresetHandler:
         timeout_sequence = rospy.get_param('~timeout/sequence', 0.20)
         self.__event_manager = EventManager(timeout_press, timeout_sequence)
         # MoveIt! parameters
-        move_group_enabled = rospy.get_param('~move_group/enabled', True)
+        try:
+            from .move_group_utils import MoveGroupUtils
+            move_group_enabled = rospy.get_param('~move_group/enabled', True)
+        except ImportError as e:
+            move_group_enabled = False
 
         if move_group_enabled:
             p = '~move_group/'
