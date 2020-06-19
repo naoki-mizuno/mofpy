@@ -56,12 +56,12 @@ class Twist2DOF(Action):
         twist.angular.z = w
 
         if self.__stamped:
-            msg = twist
-        else:
             msg = TwistStamped()
             msg.header.stamp = rospy.Time.now()
             msg.header.frame_id = self.__frame_id
             msg.twist = twist
+        else:
+            msg = twist
         self.__pub_cmd_vel.publish(msg)
 
 
