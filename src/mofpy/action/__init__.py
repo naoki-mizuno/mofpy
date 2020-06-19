@@ -7,10 +7,10 @@ __path__ = pkgutil.extend_path(__path__, __name__)
 for importer, modname, ispkg in pkgutil.walk_packages(path=__path__,
                                                       prefix=__name__ + '.'):
     try:
-        __import__(modname)
+        __import__(modname, fromlist=['.'])
     except ImportError as e:
         # Silently fail here. Message will be printed by PresetHandler
-        Action.disabled[modname] = e.message
+        Action.disabled[modname] = str(e)
 
 del importer, modname, ispkg
 del pkgutil
